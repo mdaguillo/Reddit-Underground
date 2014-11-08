@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pre-dex-items>
+
+    <item
+        dex="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\pre-dexed\debug\jreddit-1.0.0-e41426a1dbef20e80add2f906b6006b5d6c9ee26.jar"
+        jar="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\libs\jreddit-1.0.0.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="9c555da3926ccf3bf0e1bdba0debc4474f6ebed9"/>
+    <item
+        dex="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\pre-dexed\debug\httpclient-android-4.3.5-91d5b01db56b0de6ed80feb3144dc40bb6fd7f39.jar"
+        jar="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\libs\httpclient-android-4.3.5.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="82edcaec6c7b4599eaeaaf11167ceea41db42f33"/>
+    <item
+        dex="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\pre-dexed\debug\commons-io-2.4-javadoc-0787dd063ede401d43fe9669321ae23f473f5242.jar"
+        jar="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\libs\commons-io-2.4\commons-io-2.4-javadoc.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="3b5b0183c509963d5ffdf0d9d452a4a7521aeaa3"/>
+    <item
+        dex="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\pre-dexed\debug\support-v4-19.1.0-1f759ba90ce2f55a822fec984507d44c9e90076d.jar"
+        jar="E:\Treehouse Android Programming\android-studio\sdk\extras\android\m2repository\com\android\support\support-v4\19.1.0\support-v4-19.1.0.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67"/>
+    <item
+        dex="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\pre-dexed\debug\classes-ad79fef4ac64b33e1331c643f5cb1360e35df182.jar"
+        jar="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\19.1.0\classes.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28"/>
+    <item
+        dex="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\pre-dexed\debug\json-simple-1.1.1-13d4a3d6be9e2e2d51f28072ce38619af8e19a31.jar"
+        jar="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\libs\json-simple-1.1.1.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="c9ad4a0850ab676c5c64461a05ca524cdfff59f1"/>
+    <item
+        dex="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\pre-dexed\debug\commons-io-2.4-sources-dd3cb64bd742a9ce30c9c09d2a63c2320d4170d0.jar"
+        jar="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\libs\commons-io-2.4\commons-io-2.4-sources.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="f2d8698c46d1167ff24b06a840a87d91a02db891"/>
+    <item
+        dex="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\pre-dexed\debug\commons-io-2.4-faff8e37f0d9d9eabb3e24e2c0ffb7fc1f9a2d48.jar"
+        jar="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\libs\commons-io-2.4\commons-io-2.4.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="b1b6ea3b7e4aa4f492509a4952029cd8e48019ad"/>
+
+</pre-dex-items>
