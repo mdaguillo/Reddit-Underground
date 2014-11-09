@@ -1,8 +1,10 @@
 package com.mikedaguillo.reddit_underground;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -15,21 +17,17 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import org.json.JSONObject;
-
 import com.github.jreddit.utils.Utils;
 
-import org.json.JSONObject;
 import org.json.simple.JSONArray;
 
 import java.util.ArrayList;
 
-public class RedditUnderground extends ActionBarActivity {
+public class RedditInstance extends ActionBarActivity {
 
-    public static final String TAG = RedditUnderground.class.getSimpleName(); //Tag for error messages
-    private static final String GAMESURL = "/r/games.json";
+    public static final String TAG = RedditInstance.class.getSimpleName(); //Tag for error messages
+    private static String SUBREDDIT;
     protected ProgressBar mProgressBar; // create the progress bar to display while the list loads
-    private org.json.simple.JSONObject subredditData;
     String[] mTitles;
 
     @Override
@@ -37,11 +35,15 @@ public class RedditUnderground extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reddit_underground);
 
+        Intent intent = getIntent();
+        Uri subredditURI = intent.getData();
+        SUBREDDIT = subredditURI.toString();
+
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         if (isNetworkAvailable()) {
             mProgressBar.setVisibility(View.VISIBLE);
-            connectToReddit connection = new connectToReddit();
+            ConnectToReddit connection = new ConnectToReddit();
             connection.execute();
         }
         else {
@@ -57,22 +59,22 @@ public class RedditUnderground extends ActionBarActivity {
         listView.setAdapter(adapter);
     }
 
-    private class connectToReddit extends AsyncTask<Object, Void, String[]>    {
+    private class ConnectToReddit extends AsyncTask<Object, Void, String[]>    {
 
         @Override
         protected String[] doInBackground(Object... objects) {
             //Grab the JSONObject from the correct subreddit
             Utils utils = new Utils();
-            org.json.simple.JSONObject gamesJSON = (org.json.simple.JSONObject) utils.get(GAMESURL, null);
-            Log.i(TAG, "JSON Data retrieved from URL. Printing the JSONObject displays: " + gamesJSON.toJSONString());
+            org.json.simple.JSONObject gamesJSON = (org.json.simple.JSONObject) utils.get(SUBREDDIT, null);
+            Log.i(TAG, "JSON object retrieved from URL.");
 
 
             //Grab the subreddit data
             org.json.simple.JSONObject gamesData = (org.json.simple.JSONObject) gamesJSON.get("data");
-            Log.i(TAG, "JSON Data retrieved from original JSONObject. Printing the JSONObject displays: " + gamesData.toJSONString());
+            Log.i(TAG, "JSON Data retrieved from original JSONObject.");
 
             JSONArray children = (JSONArray) gamesData.get("children");
-            Log.i(TAG, "JSON Array 'Children' retrieved from JSONObject. Printing the JSONArray displays: " + children.toJSONString());
+            Log.i(TAG, "JSON Array 'Children' retrieved from JSON Data.");
 
             //Grab Each object out of the children array and place in an array list of JSONObjects
             ArrayList<org.json.simple.JSONObject> gamesPosts = new ArrayList<org.json.simple.JSONObject>();
@@ -113,25 +115,6 @@ public class RedditUnderground extends ActionBarActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.reddit_underground, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private boolean isNetworkAvailable() {
         ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
@@ -143,4 +126,5 @@ public class RedditUnderground extends ActionBarActivity {
 
         return isAvailable;
     }
+
 }

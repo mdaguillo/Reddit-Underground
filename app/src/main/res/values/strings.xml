@@ -2,7 +2,11 @@
 <resources>
 
     <string name="app_name">Reddit-Underground</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="welcome">Type the Subreddit you would like to cache</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_start_screen">RedditUnderground</string>
+    <string name="autofilled_subreddit_text">http://www.reddit.com/r/</string>
+    <string name="cache_button">Cache Subreddit Data</string>
+    <string name="display_button">Display Subreddit</string>
 
 </resources>
