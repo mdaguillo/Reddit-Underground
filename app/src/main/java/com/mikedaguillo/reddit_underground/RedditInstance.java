@@ -15,7 +15,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.github.jreddit.utils.Utils;
+import com.github.jreddit.entity.Submission;
+import com.github.jreddit.retrieval.Submissions;
 import com.github.jreddit.utils.restclient.HttpRestClient;
 import com.github.jreddit.utils.restclient.RestClient;
 
@@ -23,6 +24,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class RedditInstance extends ActionBarActivity {
 
@@ -34,9 +37,6 @@ public class RedditInstance extends ActionBarActivity {
     String[] mSubreddit; //array of subreddits if viewing /r/all
     int[] mNumComments; //array of total comments per post
 
-    // Initialize REST Client
-    RestClient restClient = new HttpRestClient();
-    restClient.setUserAgent("bot/1.0 by name");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,47 +76,22 @@ public class RedditInstance extends ActionBarActivity {
         @Override
         protected String[] doInBackground(Object... objects) {
 
-            //Grab the JSONObject from the correct subreddit
-            //the utils object is from the reddit wrapper library, which uses simple JSON Objects
-            //the .get() method retrieves JSON data from a subreddit URL
-            Utils utils = new Utils();
-            org.json.simple.JSONObject subredditParentJSON = (org.json.simple.JSONObject) utils.get(subreddit, null);
-            Log.i(TAG, "JSON object retrieved from URL.");
+            // Initialize REST Client and list of submissions
+            RestClient restClient = new HttpRestClient();
+            restClient.setUserAgent("redditUnderground");
+            Submissions submissions = new Submissions(restClient);
 
-
-            //Grab the subreddit "data" object from the subreddit's most parent JSON object
-            org.json.simple.JSONObject subredditParentJSONData = getJSONObject(subredditParentJSON, "data");
-
-            //Grab the JSONArray from the "data" JSON Object. This array contains more JSON Objects
-            //that include the titles, author names, comments etc
-            JSONArray subredditChildrenPosts = getJSONArray(subredditParentJSONData, "children");
-
-            //Grab Each object out of the children array and place in an array list of JSONObjects
-            ArrayList<org.json.simple.JSONObject> gamesPosts = new ArrayList<org.json.simple.JSONObject>();
-            Log.i(TAG, "The size of the ArrayList is set to " + gamesPosts.size());
-            for (int i = 0; i < subredditChildrenPosts.size(); i++) {
-                gamesPosts.add(i, (org.json.simple.JSONObject) subredditChildrenPosts.get(i));
-                Log.i(TAG, "ArrayList Object " + i + " created.");
-            }
-            Log.i(TAG, "JSON ArrayList<JSONObject> created for the data in the array");
-
-            //Each JSONObject within the arraylist contains the JSONObject "data"
-            //which we need to grab the title, author, and other info
-            //Store this data in a new arraylist
-            ArrayList<org.json.simple.JSONObject> gamesPostsData = new ArrayList<org.json.simple.JSONObject>();
-            for (int i = 0; i < subredditChildrenPosts.size(); i++) {
-                gamesPostsData.add(i, (org.json.simple.JSONObject) gamesPosts.get(i).get("data"));
-                Log.i(TAG, "ArrayList of titles, entry " + i + " created.");
-            }
-            Log.i(TAG, "JSON ArrayList<JSONObject> created for the individual posts information");
+            // Pass the subreddit entered by the user on the start screen
+            List<Submission> subredditSubmissions = submissions.parse(subreddit);
 
             //Now with the each posts data in the array list gamesPostsData
             //set the mTitles size, and add each title into the mTitles array
-            mTitles = new String[gamesPostsData.size()];
+            mTitles = new String[subredditSubmissions.size()];
             Log.i(TAG, "mTitles string array size determined. Size is: " + mTitles.length);
 
             for (int i = 0; i < mTitles.length; i++) {
-                mTitles[i] = (String) gamesPostsData.get(i).get("title");
+                //mTitles[i] = (String) gamesPostsData.get(i).get("title");
+                mTitles[i] = (String) subredditSubmissions.get(i).getTitle();
                 Log.i(TAG, "Iterating through mTitles and adding title info. Currently at entry: " + i);
             }
 
