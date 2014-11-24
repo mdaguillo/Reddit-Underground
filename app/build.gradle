@@ -2,10 +2,14 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "20.0.0"
+    buildToolsVersion '20.0.0'
 
     packagingOptions {
-        exclude 'META-INF/LICENSE.TXT'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
     }
 
     defaultConfig {
@@ -25,11 +29,6 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile files('libs/jreddit-1.0.0.jar')
-    compile files('libs/json-simple-1.1.1.jar')
-    compile files('libs/httpclient-android-4.3.5.jar')
-    compile files('libs/commons-io-2.4/commons-io-2.4.jar')
-    compile files('libs/commons-io-2.4/commons-io-2.4-javadoc.jar')
-    compile files('libs/commons-io-2.4/commons-io-2.4-sources.jar')
     compile 'com.android.support:appcompat-v7:19.+'
+    compile project(':raw4j')
 }

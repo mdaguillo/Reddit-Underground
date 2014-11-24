@@ -59,16 +59,14 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates" />
       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
     </content>
-    <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="library" exported="" name="appcompat-v7-19.1.0" level="project" />
-    <orderEntry type="library" exported="" name="commons-io-2.4-javadoc" level="project" />
     <orderEntry type="library" exported="" name="support-v4-19.1.0" level="project" />
-    <orderEntry type="library" exported="" name="json-simple-1.1.1" level="project" />
-    <orderEntry type="library" exported="" name="httpclient-android-4.3.5" level="project" />
+    <orderEntry type="library" exported="" name="jackson-all-1.9.0" level="project" />
     <orderEntry type="library" exported="" name="commons-io-2.4" level="project" />
-    <orderEntry type="library" exported="" name="commons-io-2.4-sources" level="project" />
-    <orderEntry type="library" exported="" name="jreddit-1.0.0" level="project" />
+    <orderEntry type="library" exported="" name="commons-lang3-3.3.2" level="project" />
+    <orderEntry type="module" module-name="raw4j" exported="" />
   </component>
 </module>
 

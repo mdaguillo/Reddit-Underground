@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="json-simple-1.1.1">
+  <library name="jackson-all-1.9.0">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/app/libs/json-simple-1.1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/app/libs/jackson-all-1.9.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
