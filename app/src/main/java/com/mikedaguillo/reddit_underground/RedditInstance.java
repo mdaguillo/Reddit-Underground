@@ -49,8 +49,7 @@ public class RedditInstance extends ActionBarActivity {
             mProgressBar.setVisibility(View.VISIBLE);
             ConnectToReddit connection = new ConnectToReddit();
             connection.execute();
-        }
-        else {
+        } else {
             Toast.makeText(this, "Unable to establish a connection to reddit", Toast.LENGTH_LONG).show();
         }
     }
@@ -65,7 +64,7 @@ public class RedditInstance extends ActionBarActivity {
     }
 
     //custom AsyncTask to run in the background to grab data from Reddit
-    private class ConnectToReddit extends AsyncTask<Object, Void, String[]>    {
+    private class ConnectToReddit extends AsyncTask<Object, Void, String[]> {
 
         @Override
         protected String[] doInBackground(Object... objects) {
@@ -86,24 +85,11 @@ public class RedditInstance extends ActionBarActivity {
                 }
             } catch (RedditException e) {
                 e.printStackTrace();
+
             }
 
             return mTitles;
         }
-
-        /*//helper method to extract child JSON Array from a parent JSON Object
-        private JSONArray getJSONArray(JSONObject json, String arrayname) {
-            JSONArray newJSONArray = (JSONArray) json.get(arrayname);
-            Log.i(TAG, "JSON Array, " + arrayname + ", retrieved from JSON Data.");
-            return newJSONArray;
-        }
-
-        //helper method to extract child JSON Object from a parent JSON Object
-        private JSONObject getJSONObject(JSONObject json, String objectname) {
-            JSONObject newJSONObject = (JSONObject) json.get(objectname);
-            Log.i(TAG, "JSON object, " + objectname + ", retrieved from original JSONObject.");
-            return newJSONObject;
-        }*/
 
         @Override
         protected void onPostExecute(String[] result) {
@@ -123,5 +109,5 @@ public class RedditInstance extends ActionBarActivity {
 
         return isAvailable;
     }
-
 }
+

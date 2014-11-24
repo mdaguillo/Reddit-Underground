@@ -36,6 +36,11 @@ public class StartScreen extends ActionBarActivity {
         displayButton.setEnabled(false);
     }
 
+    @Override
+    public android.support.v4.app.FragmentManager getSupportFragmentManager() {
+        return null;
+    }
+
     private class CacheButtonListener implements View.OnClickListener {
 
         @Override
@@ -64,7 +69,6 @@ public class StartScreen extends ActionBarActivity {
             Intent intent = new Intent(view.getContext(), RedditInstance.class);
             intent.setData(Uri.parse(subreddit));
             startActivity(intent);
-
         }
     }
 
