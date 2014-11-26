@@ -7,6 +7,6 @@
     <string name="title_activity_start_screen">RedditUnderground</string>
     <string name="autofilled_subreddit_text">http://www.reddit.com/r/</string>
     <string name="cache_button">Cache Subreddit Data</string>
-    <string name="display_button">Display Subreddit</string>
+    <string name="display_button">Display</string>
 
 </resources>

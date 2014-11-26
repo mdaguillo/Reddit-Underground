@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="10dp"
+    >
+
+    <TextView
+        android:id="@+id/postTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Example Post"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/postAuthor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_alignLeft="@+id/postTitle"
+        android:layout_alignStart="@+id/postTitle"
+        android:layout_below="@+id/postTitle"
+        android:text="Author"
+        android:textSize="14sp"
+        />
+
+    <TextView
+        android:id="@+id/leftSeperator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@+id/postAuthor"
+        android:layout_below="@+id/postTitle"
+        android:text="|"
+        android:textSize="14sp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        />
+
+    <TextView
+        android:id="@+id/postSubReddit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@+id/leftSeperator"
+        android:layout_below="@+id/postTitle"
+        android:text="Subreddit"
+        android:textSize="14sp"
+        />
+
+    <TextView
+        android:id="@+id/rightSeperator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@+id/postSubReddit"
+        android:layout_below="@+id/postTitle"
+        android:text="|"
+        android:textSize="14sp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        />
+
+    <TextView
+        android:id="@+id/postComments"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@+id/rightSeperator"
+        android:layout_below="@+id/postTitle"
+        android:text="Comments: 700"
+        android:textSize="14sp"
+        />
+
+</RelativeLayout>
