@@ -2,6 +2,8 @@ package com.mikedaguillo.reddit_underground;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -12,8 +14,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -23,7 +25,11 @@ import com.cd.reddit.Reddit;
 import com.cd.reddit.RedditException;
 import com.cd.reddit.json.mapping.RedditLink;
 
-import java.lang.reflect.Array;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +38,8 @@ public class RedditInstance extends ActionBarActivity {
     public static final String TAG = RedditInstance.class.getSimpleName(); //Tag for error messages
     private String subreddit;
     protected ProgressBar mProgressBar; // create the progress bar to display while the list loads
-    String[] mTitles; //array to store the post titles
     ArrayList<RedditListItem> redditPosts; // array list to store the data need from a post in a subreddit
+    ArrayList<Bitmap> thumbnailBitmaps; // array of the bitmaps to display the thumbnails
 
 
     @Override
@@ -52,6 +58,7 @@ public class RedditInstance extends ActionBarActivity {
         if (isNetworkAvailable()) {
             mProgressBar.setVisibility(View.VISIBLE);
             ConnectToReddit connection = new ConnectToReddit();
+
             connection.execute();
         } else {
             Toast.makeText(this, "Unable to establish a connection to reddit", Toast.LENGTH_LONG).show();
@@ -72,35 +79,49 @@ public class RedditInstance extends ActionBarActivity {
         @Override
         protected ArrayList<RedditListItem> doInBackground(Object... objects) {
 
+            // Create the array that will hold the reddit posts in the custom list item data structure
             redditPosts = new ArrayList<RedditListItem>();
+            thumbnailBitmaps = new ArrayList<Bitmap>();
 
+            // Create raw4j Reddit object
             Reddit redditInstance = new Reddit("Mike");
             try {
+                // Grab the raw4j data structure that stores the JSON data for a list of posts in a subreddit
                 List<RedditLink> subRedditListing = redditInstance.listingFor(subreddit, "hot");
 
-                //Now with the each posts data in the array list gamesPostsData
-                //set the mTitles size, and add each title into the mTitles array
+                // Create a RedditListItem object for each post in the List<RedditLink> object
+                // and set the data in the RedditListItem to the relevant info in the post
+                // finally add each of the RedditListItem's into the array that will store these objects
                 for (int i = 0; i < subRedditListing.size(); i++){
                     RedditListItem post = new RedditListItem(subRedditListing.get(i).getTitle(),
                             subRedditListing.get(i).getAuthor(),
                             subRedditListing.get(i).getSubreddit(),
-                            subRedditListing.get(i).getNumComments());
-
+                            subRedditListing.get(i).getNum_comments(),
+                            subRedditListing.get(i).getThumbnail(),
+                            subRedditListing.get(i).isOver18());
                     redditPosts.add(post);
                 }
 
+                for (int i = 0; i < redditPosts.size(); i++) {
+                    // iterate through the posts create a bitmap object from the URLs
+                    // add to local scope ArrayList<Bitmap>
+                    Log.i(TAG, redditPosts.get(i).getThumbnailSrc());
+                    Log.i(TAG, "" + redditPosts.get(i).getNSFW());
 
-                /*mTitles = new String[subRedditListing.size()];
-                Log.i(TAG, "mTitles string array size determined. Size is: " + mTitles.length);
+                    if (redditPosts.get(i).getThumbnailSrc().equals("")){
+                        // if there's no image, display placeholder reddit icon
+                        thumbnailBitmaps.add(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.default_reddit_icon));
+                    }
+                    else if (redditPosts.get(i).getThumbnailSrc().equals("nsfw")){
+                        thumbnailBitmaps.add(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.default_reddit_icon_nsfw));
+                    }
+                    else {
+                        thumbnailBitmaps.add(getImageBitmap(redditPosts.get(i).getThumbnailSrc()));
+                    }
+                }
 
-                for (int i = 0; i < mTitles.length; i++) {
-                    //mTitles[i] = (String) gamesPostsData.get(i).get("title");
-                    mTitles[i] = (String) subRedditListing.get(i).getTitle();
-                    Log.i(TAG, "Iterating through mTitles and adding title info. Currently at entry: " + i);
-                }*/
             } catch (RedditException e) {
                 e.printStackTrace();
-
             }
 
             return redditPosts;
@@ -108,11 +129,13 @@ public class RedditInstance extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(ArrayList<RedditListItem> result) {
+            // Remove the progress bar and set thew view
             mProgressBar.setVisibility(View.INVISIBLE);
             setView(result);
         }
     }
 
+    // Method to check if there is a network connection available
     private boolean isNetworkAvailable() {
         ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
@@ -125,11 +148,8 @@ public class RedditInstance extends ActionBarActivity {
         return isAvailable;
     }
 
-    /**
-     * Created by Mike on 11/26/2014.
-     *
-     * Custom view adapter to display subreddit posts on the RedditInstance class
-     */
+
+    // Custom view adapter to display subreddit posts on the RedditInstance class
      class RedditViewAdapter extends BaseAdapter {
 
         ArrayList<RedditListItem> posts;
@@ -165,6 +185,7 @@ public class RedditInstance extends ActionBarActivity {
             TextView postAuthor = (TextView)view.findViewById(R.id.postAuthor);
             TextView postSubReddit = (TextView)view.findViewById(R.id.postSubReddit);
             TextView postComments = (TextView)view.findViewById(R.id.postComments);
+            ImageView postThumbnail = (ImageView)view.findViewById(R.id.thumbnail);
 
             RedditListItem post = posts.get(i);
 
@@ -172,10 +193,27 @@ public class RedditInstance extends ActionBarActivity {
             postAuthor.setText(post.getAuthor());
             postSubReddit.setText(post.getSubreddit());
             postComments.setText("Comments: " + post.getNumOfComments());
+            postThumbnail.setImageBitmap(thumbnailBitmaps.get(i));
 
             return view;
         }
     }
 
+    private Bitmap getImageBitmap(String url) {
+        Bitmap bm = null;
+        try {
+            URL aURL = new URL(url);
+            URLConnection conn = aURL.openConnection();
+            conn.connect();
+            InputStream is = conn.getInputStream();
+            BufferedInputStream bis = new BufferedInputStream(is);
+            bm = BitmapFactory.decodeStream(bis);
+            bis.close();
+            is.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Error getting bitmap", e);
+        }
+        return bm;
+    }
 }
 

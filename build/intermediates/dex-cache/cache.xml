@@ -12,7 +12,13 @@
         jar="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\raw4j\build\libs\raw4j.jar"
         jumboMode="false"
         revision="20.0.0"
-        sha1="fd125259e37220c28b7e54a854508e499197443e"/>
+        sha1="459ddae321c21d44d296526701897bef5edf9cd5"/>
+    <item
+        dex="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\pre-dexed\debug\classes-31ef310bcf8a37e8aa7f7f33ae8c5d3bda2d153f.jar"
+        jar="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\build\intermediates\exploded-aar\com.android.support\appcompat-v7\19.1.0\classes.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28"/>
     <item
         dex="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\pre-dexed\debug\support-v4-19.1.0-1f759ba90ce2f55a822fec984507d44c9e90076d.jar"
         jar="E:\Treehouse Android Programming\android-studio\sdk\extras\android\m2repository\com\android\support\support-v4\19.1.0\support-v4-19.1.0.jar"
@@ -25,12 +31,6 @@
         jumboMode="false"
         revision="20.0.0"
         sha1="659861b4acde07a0527211e40d256119face1d15"/>
-    <item
-        dex="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\pre-dexed\debug\classes-ad79fef4ac64b33e1331c643f5cb1360e35df182.jar"
-        jar="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\19.1.0\classes.jar"
-        jumboMode="false"
-        revision="20.0.0"
-        sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28"/>
     <item
         dex="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\build\intermediates\pre-dexed\debug\jackson-all-1.9.0-292759b11e647f53c2bb4aebe652d4e02ee492fa.jar"
         jar="E:\Users\Mike\AndroidStudioProjects\Reddit-Underground\app\libs\jackson-all-1.9.0.jar"

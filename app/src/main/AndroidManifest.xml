@@ -7,7 +7,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/default_reddit_icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
@@ -16,7 +16,7 @@
         </activity>
         <activity
             android:name=".StartScreen"
-            android:label="@string/title_activity_start_screen" >
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -6,71 +6,92 @@
     android:paddingBottom="10dp"
     >
 
-    <TextView
-        android:id="@+id/postTitle"
+    <ImageView
+        android:id="@+id/thumbnail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Example Post"
-        android:textSize="20sp" />
+        android:maxHeight="100dp"
+        android:maxWidth="100dp"
+        android:minHeight="100dp"
+        android:minWidth="100dp"
+        android:paddingTop="5dp"
+        android:adjustViewBounds="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/default_reddit_icon" />
 
-    <TextView
-        android:id="@+id/postAuthor"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_alignLeft="@+id/postTitle"
-        android:layout_alignStart="@+id/postTitle"
-        android:layout_below="@+id/postTitle"
-        android:text="Author"
-        android:textSize="14sp"
-        />
+        android:layout_toRightOf="@+id/thumbnail"
+        android:paddingLeft="10dp">
 
-    <TextView
-        android:id="@+id/leftSeperator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_toRightOf="@+id/postAuthor"
-        android:layout_below="@+id/postTitle"
-        android:text="|"
-        android:textSize="14sp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        />
+        <TextView
+            android:id="@+id/postTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Example Post"
+            android:textSize="15sp" />
 
-    <TextView
-        android:id="@+id/postSubReddit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_toRightOf="@+id/leftSeperator"
-        android:layout_below="@+id/postTitle"
-        android:text="Subreddit"
-        android:textSize="14sp"
-        />
+        <TextView
+            android:id="@+id/postAuthor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_alignLeft="@+id/postTitle"
+            android:layout_alignStart="@+id/postTitle"
+            android:layout_below="@+id/postTitle"
+            android:text="Author"
+            android:textSize="10sp"
+            />
 
-    <TextView
-        android:id="@+id/rightSeperator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_toRightOf="@+id/postSubReddit"
-        android:layout_below="@+id/postTitle"
-        android:text="|"
-        android:textSize="14sp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        />
+        <TextView
+            android:id="@+id/leftSeperator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_toRightOf="@+id/postAuthor"
+            android:layout_below="@+id/postTitle"
+            android:text="|"
+            android:textSize="10sp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            />
 
-    <TextView
-        android:id="@+id/postComments"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_toRightOf="@+id/rightSeperator"
-        android:layout_below="@+id/postTitle"
-        android:text="Comments: 700"
-        android:textSize="14sp"
-        />
+        <TextView
+            android:id="@+id/postSubReddit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_toRightOf="@+id/leftSeperator"
+            android:layout_below="@+id/postTitle"
+            android:text="Subreddit"
+            android:textSize="10sp"
+            />
+
+        <TextView
+            android:id="@+id/rightSeperator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_toRightOf="@+id/postSubReddit"
+            android:layout_below="@+id/postTitle"
+            android:text="|"
+            android:textSize="10sp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            />
+
+        <TextView
+            android:id="@+id/postComments"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_toRightOf="@+id/rightSeperator"
+            android:layout_below="@+id/postTitle"
+            android:text="Comments"
+            android:textSize="10sp"
+            />
+        </RelativeLayout>
 
 </RelativeLayout>
