@@ -2,4 +2,5 @@
 <resources>
     <color name="actionbar_color">#3c7fc1</color>
     <color name="white">#ffffff</color>
+    <color name="background_grey">#eeeeee</color>
 </resources>
