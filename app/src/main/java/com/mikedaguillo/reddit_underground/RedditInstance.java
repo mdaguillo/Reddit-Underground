@@ -85,6 +85,7 @@ public class RedditInstance extends ActionBarActivity {
 
             // Create raw4j Reddit object
             Reddit redditInstance = new Reddit("Mike");
+
             try {
                 // Grab the raw4j data structure that stores the JSON data for a list of posts in a subreddit
                 List<RedditLink> subRedditListing = redditInstance.listingFor(subreddit, "hot");

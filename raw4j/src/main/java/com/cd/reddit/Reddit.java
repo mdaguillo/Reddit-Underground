@@ -159,6 +159,21 @@ public class Reddit {
 		RedditJsonParser parser = new RedditJsonParser(response.getBody());
 		return parser.parseSubreddits();
 	}
+
+    //See Reddit's built-in documentation for more detailed info: http://www.reddit.com/dev/api#GET_subreddits_{where}
+    //Added ability to include the number of subreddits to pull (limit)
+    public List<RedditSubreddit> subreddits(String byGrouping, int limit) throws RedditException{
+        final List<String> path = new ArrayList<String>(2);
+
+        path.add(RedditApiResourceConstants.SUBREDDITS);
+        path.add(byGrouping + RedditApiResourceConstants.DOT_JSON + "?limit=" + limit);
+
+        final RedditRequestInput requestInput = new RedditRequestInput(path);
+        final RedditRequestResponse response = requestor.executeGet(requestInput);
+
+        RedditJsonParser parser = new RedditJsonParser(response.getBody());
+        return parser.parseSubreddits();
+    }
 	
 	public List<RedditLink> listingFor(final String subreddit, final String listingType) throws RedditException{
 		final List<String> pathSegments = new ArrayList<String>(3);
