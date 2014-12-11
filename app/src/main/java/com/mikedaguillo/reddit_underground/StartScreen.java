@@ -2,6 +2,7 @@ package com.mikedaguillo.reddit_underground;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,7 +19,7 @@ public class StartScreen extends ActionBarActivity {
 
     private static final int LOGIN_REQUEST = 1;
 
-    private boolean loggedIn = false;
+    private boolean loggedIn;
 
     private final String LOGIN_TEXT = "Login To Your Reddit Account";
     private final String MANUAL_TEXT = "Manually Enter a Subreddit";
@@ -34,6 +35,8 @@ public class StartScreen extends ActionBarActivity {
 
     private ArrayList<String> subscribedSubreddits;
 
+    public static final String PREFS_NAME = "MyPrefsFile";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,7 +46,15 @@ public class StartScreen extends ActionBarActivity {
         loggedInAdapter = new ArrayAdapter<String>(this, R.layout.menu_item, R.id.menuItem, loggedInOptions);
 
         listView = (ListView) findViewById(R.id.startScreenListView);
-        listView.setAdapter(loggedOutAdapter);
+
+        if (savedInstanceState != null && savedInstanceState.getBoolean("LoggedIn")) {
+            listView.setAdapter(loggedInAdapter);
+        }
+        else {
+            listView.setAdapter(loggedOutAdapter);
+        }
+
+
 
         // ListView Item Click Listener
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -90,9 +101,43 @@ public class StartScreen extends ActionBarActivity {
     @Override
     public void onResume() {
         super.onResume();
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        loggedIn = settings.getBoolean("LoggedIn", false);
+
         if (loggedIn) {
             listView.setAdapter(loggedInAdapter);
         }
+
+        Log.i(TAG, "onResume completed");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean("LoggedIn", loggedIn);
+        editor.commit();
+        Log.i(TAG, "onPause completed");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        savedInstanceState.putBoolean("LoggedIn", loggedIn);
+        Log.i(TAG, "onSavedInstanceState completed");
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // Restore UI state from the savedInstanceState.
+        // This bundle has also been passed to onCreate.
+        loggedIn = savedInstanceState.getBoolean("LoggedIn");
+        Log.i(TAG, "onRestoreInstanceState completed");
     }
 
     @Override
@@ -102,11 +147,19 @@ public class StartScreen extends ActionBarActivity {
             case (LOGIN_REQUEST) : {
                 if (resultCode == Activity.RESULT_OK) {
                     String newText = data.getStringExtra("Reddit Account");
+
+                    // Change the login state and save the state to the preferences
                     loggedIn = true;
+                    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putBoolean("LoggedIn", loggedIn);
+                    editor.commit();
+
                     Log.i(TAG, newText);
                     subscribedSubreddits = data.getStringArrayListExtra("Subreddits");
                     Log.i(TAG, "You are subscribed to this many subreddits: " + subscribedSubreddits.size());
                     listView.setAdapter(loggedInAdapter);
+                    Log.i(TAG, "onActivityResult completed");
                 }
                 break;
             }

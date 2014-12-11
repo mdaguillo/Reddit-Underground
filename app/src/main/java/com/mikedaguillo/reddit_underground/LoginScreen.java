@@ -111,6 +111,7 @@ public class LoginScreen extends ActionBarActivity {
                     subredditTitles.add(subreddit.getSubredditName());
                     Log.i(TAG, subreddit.getSubredditName());
                 }
+
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("Reddit Account", "BetaRhoOmega");
                 resultIntent.putStringArrayListExtra("Subreddits", subredditTitles);
