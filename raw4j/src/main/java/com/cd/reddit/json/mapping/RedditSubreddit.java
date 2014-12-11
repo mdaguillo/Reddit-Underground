@@ -22,7 +22,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RedditSubreddit extends RedditType{
+public class RedditSubreddit extends RedditType {
 	private int accountsActive;
 	private int commentScoreHideMins;	
 	private String description;	

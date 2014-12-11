@@ -37,7 +37,7 @@ public class RedditInstance extends ActionBarActivity {
 
     public static final String TAG = RedditInstance.class.getSimpleName(); //Tag for error messages
     private String subreddit;
-    protected ProgressBar mProgressBar; // create the progress bar to display while the list loads
+    private ProgressBar mProgressBar; // create the progress bar to display while the list loads
     ArrayList<RedditListItem> redditPosts; // array list to store the data need from a post in a subreddit
     ArrayList<Bitmap> thumbnailBitmaps; // array of the bitmaps to display the thumbnails
 
@@ -69,7 +69,7 @@ public class RedditInstance extends ActionBarActivity {
     private void setView(ArrayList<RedditListItem> viewListItems) {
 
         RedditViewAdapter redditView = new RedditViewAdapter(viewListItems);
-        ListView listView = (ListView) findViewById(R.id.listView);
+        ListView listView = (ListView) findViewById(R.id.subredditsListView);
         listView.setAdapter(redditView);
     }
 

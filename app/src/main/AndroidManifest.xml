@@ -23,6 +23,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".LoginScreen"
+            android:label="Reddit Underground">
+        </activity>
+        <activity
+            android:name=".ManualEntryScreen"
+            android:label="Reddit Underground">
+        </activity>
+        <activity
+            android:name=".SubredditsSelectionScreen"
+            android:label="Reddit Underground">
+        </activity>
     </application>
 
 </manifest>
