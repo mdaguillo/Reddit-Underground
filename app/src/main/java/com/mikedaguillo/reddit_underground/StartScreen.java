@@ -24,11 +24,12 @@ public class StartScreen extends ActionBarActivity {
     private final String LOGIN_TEXT = "Login To Your Reddit Account";
     private final String MANUAL_TEXT = "Manually Enter a Subreddit";
     private final String SUBREDDITS_TEXT = "Your Subscribed Subreddits";
+    private final String LOGOUT_TEXT = "Logout";
 
     private ListView listView;
 
     private String[] loggedOutOptions = new String[] {LOGIN_TEXT, MANUAL_TEXT};
-    private String[] loggedInOptions = new String[] {MANUAL_TEXT, SUBREDDITS_TEXT};
+    private String[] loggedInOptions = new String[] {MANUAL_TEXT, SUBREDDITS_TEXT, LOGOUT_TEXT};
 
     private ArrayAdapter<String> loggedOutAdapter;
     private ArrayAdapter<String> loggedInAdapter;
@@ -85,6 +86,10 @@ public class StartScreen extends ActionBarActivity {
                             intent = new Intent(view.getContext(), SubredditsSelectionScreen.class);
                             intent.putStringArrayListExtra("Subreddits", subscribedSubreddits);
                             startActivity(intent);
+                            break;
+                        case 2:
+                            loggedIn = false;
+                            listView.setAdapter(loggedOutAdapter);
                             break;
                     }
                 }
