@@ -2,7 +2,6 @@ package com.mikedaguillo.reddit_underground;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +15,7 @@ import java.util.ArrayList;
 public class StartScreen extends ActionBarActivity {
 
     public static final String TAG = StartScreen.class.getSimpleName(); //Tag for error messages
+    public static final String PREFS_NAME = "MyPrefsFile";
 
     private static final int LOGIN_REQUEST = 1;
 
@@ -35,8 +35,6 @@ public class StartScreen extends ActionBarActivity {
     private ArrayAdapter<String> loggedInAdapter;
 
     private ArrayList<String> subscribedSubreddits;
-
-    public static final String PREFS_NAME = "MyPrefsFile";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,16 +96,32 @@ public class StartScreen extends ActionBarActivity {
 
     }
 
+   /* @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Loads the projects during the onStart so they are reloaded when the activity is resumed
+        // after creating a new project
+
+        // Gets the database helper to access the database for the application
+        SubredditsDatabaseHelper database = new SubredditsDatabaseHelper(this);
+        // Use the helper to get the list of projects from the database
+        storedSubreddits = database.getSubreddits();
+        database.close();
+
+    }*/
+
     @Override
     public android.support.v4.app.FragmentManager getSupportFragmentManager() {
         return null;
     }
 
     @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        loggedIn = settings.getBoolean("LoggedIn", false);
+        TinyDB tinyDB = new TinyDB(this);
+        loggedIn = tinyDB.getBoolean("LoggedIn");
+        subscribedSubreddits = tinyDB.getList("Subreddits");
 
         if (loggedIn) {
             listView.setAdapter(loggedInAdapter);
@@ -119,10 +133,15 @@ public class StartScreen extends ActionBarActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        /*SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("LoggedIn", loggedIn);
-        editor.commit();
+        editor.putStringSet("Subreddits", (java.util.Set<String>) subscribedSubreddits);
+        editor.commit();*/
+        TinyDB tinyDB = new TinyDB(this);
+        tinyDB.putBoolean("LoggedIn", loggedIn);
+        tinyDB.putList("Subreddits", subscribedSubreddits);
+
         Log.i(TAG, "onPause completed");
     }
 
@@ -155,13 +174,11 @@ public class StartScreen extends ActionBarActivity {
 
                     // Change the login state and save the state to the preferences
                     loggedIn = true;
-                    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putBoolean("LoggedIn", loggedIn);
-                    editor.commit();
-
-                    Log.i(TAG, newText);
                     subscribedSubreddits = data.getStringArrayListExtra("Subreddits");
+                    TinyDB tinyDB = new TinyDB(this);
+                    tinyDB.putBoolean("LoggedIn", loggedIn);
+                    tinyDB.putList("Subreddits", subscribedSubreddits);
+                    Log.i(TAG, newText);
                     Log.i(TAG, "You are subscribed to this many subreddits: " + subscribedSubreddits.size());
                     listView.setAdapter(loggedInAdapter);
                     Log.i(TAG, "onActivityResult completed");
