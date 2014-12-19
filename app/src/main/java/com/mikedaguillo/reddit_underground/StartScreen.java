@@ -24,12 +24,13 @@ public class StartScreen extends ActionBarActivity {
     private final String LOGIN_TEXT = "Login To Your Reddit Account";
     private final String MANUAL_TEXT = "Manually Enter a Subreddit";
     private final String SUBREDDITS_TEXT = "Your Subscribed Subreddits";
+    private final String SAVED_SUBREDDITS_TEXT = "Your Stored Subreddits";
     private final String LOGOUT_TEXT = "Logout";
 
     private ListView listView;
 
     private String[] loggedOutOptions = new String[] {LOGIN_TEXT, MANUAL_TEXT};
-    private String[] loggedInOptions = new String[] {MANUAL_TEXT, SUBREDDITS_TEXT, LOGOUT_TEXT};
+    private String[] loggedInOptions = new String[] {MANUAL_TEXT, SUBREDDITS_TEXT, SAVED_SUBREDDITS_TEXT, LOGOUT_TEXT};
 
     private ArrayAdapter<String> loggedOutAdapter;
     private ArrayAdapter<String> loggedInAdapter;
@@ -86,6 +87,10 @@ public class StartScreen extends ActionBarActivity {
                             startActivity(intent);
                             break;
                         case 2:
+                            intent = new Intent(view.getContext(), SavedSubredditsScreen.class);
+                            startActivity(intent);
+                            break;
+                        case 3:
                             loggedIn = false;
                             listView.setAdapter(loggedOutAdapter);
                             break;
@@ -133,14 +138,10 @@ public class StartScreen extends ActionBarActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        /*SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean("LoggedIn", loggedIn);
-        editor.putStringSet("Subreddits", (java.util.Set<String>) subscribedSubreddits);
-        editor.commit();*/
         TinyDB tinyDB = new TinyDB(this);
         tinyDB.putBoolean("LoggedIn", loggedIn);
         tinyDB.putList("Subreddits", subscribedSubreddits);
+
 
         Log.i(TAG, "onPause completed");
     }

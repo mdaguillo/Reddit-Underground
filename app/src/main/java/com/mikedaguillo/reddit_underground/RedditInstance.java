@@ -2,6 +2,7 @@ package com.mikedaguillo.reddit_underground;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import com.cd.reddit.Reddit;
 import com.cd.reddit.RedditException;
 import com.cd.reddit.json.mapping.RedditLink;
+import com.mikedaguillo.reddit_underground.SubredditDatabaseModel.SubredditsDatabaseHelper;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -36,8 +38,16 @@ import java.util.List;
 public class RedditInstance extends ActionBarActivity {
 
     public static final String TAG = RedditInstance.class.getSimpleName(); //Tag for error messages
+
+    // To determine which activity sent the intent context
+    private final int INTENT_DEFAULT = 0;
+    private final int INTENT_FROM_MANUAL_ENTRY = 1;
+    private final int INTENT_FROM_STORED_SUBREDDITS = 2;
+    public int intent_from;
+
     private String subreddit;
     private ProgressBar mProgressBar; // create the progress bar to display while the list loads
+    private SubredditsDatabaseHelper databaseHelper;
     ArrayList<RedditListItem> redditPosts; // array list to store the data need from a post in a subreddit
     ArrayList<Bitmap> thumbnailBitmaps; // array of the bitmaps to display the thumbnails
 
@@ -49,31 +59,54 @@ public class RedditInstance extends ActionBarActivity {
 
         //retrieve the subreddit passed in the intent if user manually selects a subreddit
         Intent intent = getIntent();
-        Uri subredditURI = intent.getData();
-        subreddit = subredditURI.toString();
+        intent_from = intent.getIntExtra("Intent_Int", 0);
 
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
-        //check if the network is available, if so establish a connection to Reddit
-        if (isNetworkAvailable()) {
-            mProgressBar.setVisibility(View.VISIBLE);
-            ConnectToReddit connection = new ConnectToReddit();
+        // Case if intent came from manual entry
+        if (intent_from == INTENT_FROM_MANUAL_ENTRY) {
 
-            connection.execute();
-        } else {
-            Toast.makeText(this, "Unable to establish a connection to reddit", Toast.LENGTH_LONG).show();
+            Uri subredditURI = intent.getData();
+            subreddit = subredditURI.toString();
+
+            //check if the network is available, if so establish a connection to Reddit
+            if (isNetworkAvailable()) {
+                mProgressBar.setVisibility(View.VISIBLE);
+                ConnectToReddit connection = new ConnectToReddit();
+
+                connection.execute();
+            } else {
+                Toast.makeText(this, "Unable to establish a connection to reddit", Toast.LENGTH_LONG).show();
+            }
+        }
+        else if (intent_from == INTENT_FROM_STORED_SUBREDDITS) {
+            mProgressBar.setVisibility(View.VISIBLE);
+            subreddit = intent.getStringExtra("Stored_Subreddit");
+            databaseHelper = new SubredditsDatabaseHelper(this);
+            setView(subreddit, databaseHelper);
+            mProgressBar.setVisibility(View.INVISIBLE);
         }
     }
 
-    //helper function to set the list view items to the appropriate text from the string and int arrays
+    // Helper function to set the list view items to the appropriate text from the string and int arrays
+    // This one is used if the activity is created from the manual entry screen
     private void setView(ArrayList<RedditListItem> viewListItems) {
 
-        RedditViewAdapter redditView = new RedditViewAdapter(viewListItems);
+        RedditViewAdapter redditView = new RedditViewAdapter(viewListItems, intent_from);
         ListView listView = (ListView) findViewById(R.id.subredditsListView);
         listView.setAdapter(redditView);
     }
 
-    //custom AsyncTask to run in the background to grab data from Reddit
+    // Helper function to set the list view items to the appropriate text from the string and int arrays
+    // This one is used if the activity is created from the stored subreddits screen
+    private void setView(String subredditToRetrieve, SubredditsDatabaseHelper databaseHelper) {
+        RedditViewAdapter redditView = new RedditViewAdapter(intent_from, subredditToRetrieve, databaseHelper);
+        ListView listView = (ListView) findViewById(R.id.subredditsListView);
+        listView.setAdapter(redditView);
+    }
+
+
+    // Custom AsyncTask to run in the background to grab data from Reddit
     private class ConnectToReddit extends AsyncTask<Object, Void, ArrayList<RedditListItem>> {
 
         @Override
@@ -154,14 +187,40 @@ public class RedditInstance extends ActionBarActivity {
      class RedditViewAdapter extends BaseAdapter {
 
         ArrayList<RedditListItem> posts;
+        String storedSubreddit;
+        int intentFrom;
+        SubredditsDatabaseHelper databaseHelper;
+        Cursor cursor;
 
-        public RedditViewAdapter(ArrayList<RedditListItem> redditPosts) {
+        public RedditViewAdapter(int intentFrom, String storedSubreddit, SubredditsDatabaseHelper databaseHelper) {
+            posts = null;
+            this.intentFrom = intentFrom;
+            this.storedSubreddit = storedSubreddit;
+            this.databaseHelper = databaseHelper;
+            cursor = databaseHelper.getPosts(storedSubreddit);
+        }
+
+        public RedditViewAdapter(ArrayList<RedditListItem> redditPosts, int intentFrom) {
             posts = redditPosts;
+            this.intentFrom = intentFrom;
+            storedSubreddit = null;
+            this.databaseHelper = null;
         }
 
         @Override
         public int getCount() {
-            return posts.size();
+            int count = 0;
+
+            switch (intentFrom) {
+                case INTENT_FROM_MANUAL_ENTRY:
+                    count = posts.size();
+                    break;
+                case INTENT_FROM_STORED_SUBREDDITS:
+                    count = cursor.getCount();
+                    break;
+            }
+
+            return count;
         }
 
         @Override
@@ -175,8 +234,8 @@ public class RedditInstance extends ActionBarActivity {
         }
 
         @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            if(view==null)
+        public View getView(int listPosition, View view, ViewGroup viewGroup) {
+            if(view == null)
             {
                 LayoutInflater inflater = (LayoutInflater) RedditInstance.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 view = inflater.inflate(R.layout.reddit_list_item, viewGroup, false);
@@ -188,13 +247,28 @@ public class RedditInstance extends ActionBarActivity {
             TextView postComments = (TextView)view.findViewById(R.id.postComments);
             ImageView postThumbnail = (ImageView)view.findViewById(R.id.thumbnail);
 
-            RedditListItem post = posts.get(i);
+            switch (intentFrom) {
+                case INTENT_FROM_MANUAL_ENTRY:
+                    RedditListItem post = posts.get(listPosition);
 
-            postTitle.setText(post.getTitle());
-            postAuthor.setText(post.getAuthor());
-            postSubReddit.setText(post.getSubreddit());
-            postComments.setText("Comments: " + post.getNumOfComments());
-            postThumbnail.setImageBitmap(thumbnailBitmaps.get(i));
+                    postTitle.setText(post.getTitle());
+                    postAuthor.setText(post.getAuthor());
+                    postSubReddit.setText(post.getSubreddit());
+                    postComments.setText("Comments: " + post.getNumOfComments());
+                    postThumbnail.setImageBitmap(thumbnailBitmaps.get(listPosition));
+                    break;
+                case INTENT_FROM_STORED_SUBREDDITS:
+                    cursor.moveToPosition(listPosition);
+
+                    postTitle.setText(cursor.getString(1));
+                    postAuthor.setText(cursor.getString(2));
+                    postSubReddit.setText(cursor.getString(3));
+                    postComments.setText("Comments: " + cursor.getInt(4));
+
+                    Bitmap default_image = BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.default_reddit_icon);
+                    postThumbnail.setImageBitmap(default_image);
+                    break;
+            }
 
             return view;
         }

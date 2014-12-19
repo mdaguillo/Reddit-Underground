@@ -35,6 +35,10 @@
             android:name=".SubredditsSelectionScreen"
             android:label="Reddit Underground">
         </activity>
+        <activity
+            android:name=".SavedSubredditsScreen"
+            android:label="Reddit Underground">
+        </activity>
     </application>
 
 </manifest>

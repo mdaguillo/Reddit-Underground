@@ -66,6 +66,11 @@ public class SubredditsDatabaseHelper  extends SQLiteOpenHelper {
         return cursor;
     }
 
+    public Cursor getPosts(String subredditName) {
+        Cursor cursor = getReadableDatabase().rawQuery("select * from " + POSTS_TABLE_NAME + " where subreddit = \"" + subredditName + "\"", null);
+        return cursor;
+    }
+
     public void deleteAll() {
         getWritableDatabase().delete(SUBREDDIT_TABLE_NAME, null, null);
         getWritableDatabase().delete(POSTS_TABLE_NAME, null, null);

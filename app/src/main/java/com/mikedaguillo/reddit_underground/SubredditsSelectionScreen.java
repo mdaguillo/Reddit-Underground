@@ -99,13 +99,12 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
             Post.moveToFirst();
             Log.i(TAG, "Added the subreddit: " + Subreddit.getString(1) + " to the sqlite database, at position " + Subreddit.getString(0));
             while (!Post.isAfterLast()) {
-                Log.i(TAG, Post.getString(1));
+                Log.i(TAG, Post.getString(3));
                 Post.moveToNext();
             }
         }
 
-
-
+        database.close();
     }
 
     private class CacheButtonListener implements View.OnClickListener {

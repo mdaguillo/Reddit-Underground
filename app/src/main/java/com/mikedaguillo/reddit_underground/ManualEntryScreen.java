@@ -67,6 +67,7 @@ public class ManualEntryScreen extends ActionBarActivity {
             //create an intent with the subreddit data to pass to the reddit display activity
             Intent intent = new Intent(view.getContext(), RedditInstance.class);
             intent.setData(Uri.parse(subreddit));
+            intent.putExtra("Intent_Int", 1);
             startActivity(intent);
         }
     }
