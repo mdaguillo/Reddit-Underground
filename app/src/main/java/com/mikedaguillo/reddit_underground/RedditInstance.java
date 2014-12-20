@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -48,8 +49,8 @@ public class RedditInstance extends ActionBarActivity {
     private String subreddit;
     private ProgressBar mProgressBar; // create the progress bar to display while the list loads
     private SubredditsDatabaseHelper databaseHelper;
-    ArrayList<RedditListItem> redditPosts; // array list to store the data need from a post in a subreddit
-    ArrayList<Bitmap> thumbnailBitmaps; // array of the bitmaps to display the thumbnails
+    private ArrayList<RedditListItem> redditPosts; // array list to store the data need from a post in a subreddit
+    private ArrayList<Bitmap> thumbnailBitmaps; // array of the bitmaps to display the thumbnails
 
 
     @Override
@@ -88,13 +89,27 @@ public class RedditInstance extends ActionBarActivity {
         }
     }
 
+    private class PostClickListener implements AdapterView.OnItemClickListener {
+
+        Cursor cursor = databaseHelper.getPosts(subreddit);
+
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+            cursor.moveToPosition(position);
+            Intent intent = new Intent(view.getContext(), ImageViewScreen.class);
+            intent.putExtra("Image_Byte_Array", cursor.getBlob(6));
+            startActivity(intent);
+        }
+    }
+
     // Helper function to set the list view items to the appropriate text from the string and int arrays
     // This one is used if the activity is created from the manual entry screen
     private void setView(ArrayList<RedditListItem> viewListItems) {
-
         RedditViewAdapter redditView = new RedditViewAdapter(viewListItems, intent_from);
         ListView listView = (ListView) findViewById(R.id.subredditsListView);
         listView.setAdapter(redditView);
+        PostClickListener listener = new PostClickListener();
+        listView.setOnItemClickListener(listener);
     }
 
     // Helper function to set the list view items to the appropriate text from the string and int arrays
@@ -103,6 +118,8 @@ public class RedditInstance extends ActionBarActivity {
         RedditViewAdapter redditView = new RedditViewAdapter(intent_from, subredditToRetrieve, databaseHelper);
         ListView listView = (ListView) findViewById(R.id.subredditsListView);
         listView.setAdapter(redditView);
+        PostClickListener listener = new PostClickListener();
+        listView.setOnItemClickListener(listener);
     }
 
 

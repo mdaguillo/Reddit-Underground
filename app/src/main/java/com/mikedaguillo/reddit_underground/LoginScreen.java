@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.cd.reddit.Reddit;
 import com.cd.reddit.RedditException;
@@ -51,6 +52,7 @@ public class LoginScreen extends ActionBarActivity {
         mProgressBar = (ProgressBar) findViewById(R.id.loginProgressBar);
         redditInstance = new Reddit("RedditUnderground");
 
+        loginButton.setEnabled(false);
         mProgressBar.setVisibility(View.INVISIBLE);
     }
 
@@ -74,15 +76,14 @@ public class LoginScreen extends ActionBarActivity {
 
     // method to check if there's any text in the login and password fields
     private  void checkFieldsForEmptyValues(){
-        Button b = (Button) findViewById(R.id.loginButton);
 
         String s1 = usernameInput.getText().toString();
         String s2 = passwordInput.getText().toString();
 
         if (s1.length() > 0 && s2.length() > 0) {
-            b.setEnabled(true);
+            loginButton.setEnabled(true);
         } else {
-            b.setEnabled(false);
+            loginButton.setEnabled(false);
         }
 
     }
@@ -92,7 +93,7 @@ public class LoginScreen extends ActionBarActivity {
         @Override
         public void onClick(View view) {
             mProgressBar.setVisibility(view.VISIBLE);
-            LoginToReddit login = new LoginToReddit();
+            LoginToReddit login = new LoginToReddit(usernameInput.getText().toString(), passwordInput.getText().toString());
             login.execute();
         }
     }
@@ -100,11 +101,19 @@ public class LoginScreen extends ActionBarActivity {
     // AsyncTask to Login
     private class LoginToReddit extends AsyncTask<Object, Void, Void> {
 
+        private String username;
+        private String password;
+
+        public LoginToReddit(String username, String password) {
+            this.username = username;
+            this.password = password;
+        }
+
         @Override
         protected Void doInBackground(Object... objects) {
             // login to a reddit account
             try {
-                redditInstance.login( "BetaRhoOmega", "Coffeeiphone1" );
+                redditInstance.login( username, password );
                 List<RedditSubreddit> subreddits = redditInstance.subreddits("mine/subscriber", 100);
                 ArrayList<String> subredditTitles = new ArrayList<String>();
                 for (RedditSubreddit subreddit : subreddits) {
@@ -119,6 +128,8 @@ public class LoginScreen extends ActionBarActivity {
                 finish();
 
             } catch (RedditException e) {
+                Toast toast = Toast.makeText(LoginScreen.this, "Login Failed: Please Try Again", Toast.LENGTH_LONG);
+                toast.show();
                 e.printStackTrace();
             }
 

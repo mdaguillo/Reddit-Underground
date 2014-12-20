@@ -1,7 +1,10 @@
 package com.mikedaguillo.reddit_underground;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -21,6 +24,7 @@ import com.mikedaguillo.reddit_underground.SubredditDatabaseModel.SubredditsData
 import org.apache.http.util.ByteArrayBuffer;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -37,8 +41,10 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
     private ArrayList<String> subreddits;
     private ArrayList<String> checkedSubreddits;
     private ArrayList<List<RedditLink>> listofSubreddits; // array list to store the data returned from reddit
-    private ArrayList<Object[]> arrayofByteArrays;
+    private ArrayList<Object[]> arrayofThumbnailByteArrays;
+    private ArrayList<Object[]> arrayofImageByteArrays;
     public static final String TAG = SubredditsSelectionScreen.class.getSimpleName(); //Tag for error messages
+    public ProgressDialog dialog;
 
     // For accessing the application database
     private SubredditsDatabaseHelper database;
@@ -102,14 +108,25 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
             database.addSubreddit(checkedSubreddits.get(i));
             List<RedditLink> subredditInfo = redditLinks.get(i);
 
-            Object[] byteArrays = arrayofByteArrays.get(i);
+            Object[] thumbnailByteArrays = arrayofThumbnailByteArrays.get(i);
+            Object[] imageByteArrays = arrayofImageByteArrays.get(i);
+
             for (int j = 0; j < subredditInfo.size(); j++) {
-                if (byteArrays[j] instanceof byte[]) {
-                    byte[] thumbnailImage = (byte[]) byteArrays[j];
-                    database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), thumbnailImage, i);
+                if (thumbnailByteArrays[j] instanceof byte[] && imageByteArrays[j] instanceof  byte[]) {
+                    byte[] thumbnailImage = (byte[]) thumbnailByteArrays[j];
+                    byte[] imageByteArray = (byte[]) imageByteArrays[j];
+                    database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), thumbnailImage, imageByteArray, i);
+                }
+                else if (thumbnailByteArrays[j] instanceof byte[] && !(imageByteArrays[j] instanceof  byte[])) {
+                    byte[] thumbnailImage = (byte[]) thumbnailByteArrays[j];
+                    database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), thumbnailImage, null, i);
+                }
+                else if (!(thumbnailByteArrays[j] instanceof byte[]) && imageByteArrays[j] instanceof  byte[]) {
+                    byte[] imageByteArray = (byte[]) imageByteArrays[j];
+                    database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), null, imageByteArray, i);
                 }
                 else {
-                    database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), null, i);
+                    database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), null, null, i);
                 }
             }
 
@@ -124,6 +141,7 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
             }
         }
 
+        dialog.dismiss();
         database.close();
     }
 
@@ -132,6 +150,7 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
 
         @Override
         public void onClick(View view) {
+            dialog = ProgressDialog.show(SubredditsSelectionScreen.this, "", "Please wait while the data downloads", true);
             ConnectToReddit connection = new ConnectToReddit();
             connection.execute();
         }
@@ -144,7 +163,8 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
         protected ArrayList<List<RedditLink>> doInBackground(Object... objects) {
 
            listofSubreddits = new ArrayList<List<RedditLink>>();
-           arrayofByteArrays = new ArrayList<Object[]>();
+           arrayofThumbnailByteArrays = new ArrayList<Object[]>();
+           arrayofImageByteArrays = new ArrayList<Object[]>();
 
             // Create raw4j Reddit object
             Reddit redditInstance = new Reddit("RedditUnderground");
@@ -168,21 +188,32 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
 
             for (int i = 0; i < checkedSubreddits.size(); i++) {
 
-                Object[] byteArrays = new Object[26];
+                Object[] thumbnailByteArrays = new Object[26];
+                Object[] imageByteArrrays = new Object[26];
                 List<RedditLink> posts = listofSubreddits.get(i);
 
                 for (int j = 0; j < listofSubreddits.get(i).size(); j++) {
 
-                    byte[] bytes = getThumbnail(posts.get(j).getThumbnail());
-                    if (bytes != null) {
-                        byteArrays[j] = bytes;
+                    byte[] thumbnailBytes = getByteArray(posts.get(j).getThumbnail());
+                    byte[] imageBytes = getByteArray(posts.get(j).getUrl());
+
+                    if (thumbnailBytes != null) {
+                        thumbnailByteArrays[j] = thumbnailBytes;
                     }
                     else {
-                        byteArrays[j] = -1;
+                        thumbnailByteArrays[j] = -1;
+                    }
+
+                    if (imageBytes != null) {
+                        imageByteArrrays[j] = imageBytes;
+                    }
+                    else {
+                        imageByteArrrays[j] = -1;
                     }
                 }
 
-                arrayofByteArrays.add(byteArrays);
+                arrayofThumbnailByteArrays.add(thumbnailByteArrays);
+                arrayofImageByteArrays.add(imageByteArrrays);
             }
 
             return listofSubreddits;
@@ -196,9 +227,9 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
 
     }
 
-    // Converts the thumbnail URL from the RedditLink object into a byte[] that can be stored in the
+    // Converts an image from the RedditLink object into a byte[] that can be stored in the
     // SQLite database
-    private byte[] getThumbnail(String url){
+    private byte[] getByteArray(String url){
         try {
             URL imageUrl = new URL(url);
             URLConnection ucon = imageUrl.openConnection();
@@ -206,12 +237,17 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
             InputStream is = ucon.getInputStream();
             BufferedInputStream bis = new BufferedInputStream(is);
 
-            ByteArrayBuffer baf = new ByteArrayBuffer(500);
+            Bitmap image = BitmapFactory.decodeStream(bis);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            image.compress(Bitmap.CompressFormat.JPEG, 60, outputStream);
+
+            /*ByteArrayBuffer baf = new ByteArrayBuffer(500);
             int current = 0;
             while ((current = bis.read()) != -1) {
                 baf.append((byte) current);
-            }
-            return baf.toByteArray();
+            }*/
+
+            return outputStream.toByteArray();
         } catch (Exception e) {
             Log.i(TAG, "Error: " + e.toString());
         }
