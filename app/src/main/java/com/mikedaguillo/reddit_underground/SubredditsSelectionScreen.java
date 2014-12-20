@@ -18,6 +18,12 @@ import com.cd.reddit.RedditException;
 import com.cd.reddit.json.mapping.RedditLink;
 import com.mikedaguillo.reddit_underground.SubredditDatabaseModel.SubredditsDatabaseHelper;
 
+import org.apache.http.util.ByteArrayBuffer;
+
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,10 +34,10 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
 
     private ListView subredditsListView;
     private Button cacheButton;
-    private Button displayButton;
     private ArrayList<String> subreddits;
     private ArrayList<String> checkedSubreddits;
     private ArrayList<List<RedditLink>> listofSubreddits; // array list to store the data returned from reddit
+    private ArrayList<Object[]> arrayofByteArrays;
     public static final String TAG = SubredditsSelectionScreen.class.getSimpleName(); //Tag for error messages
 
     // For accessing the application database
@@ -49,12 +55,9 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
         subredditsListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
         cacheButton = (Button) findViewById(R.id.subredditCacheButton);
-        displayButton = (Button) findViewById(R.id.subredditDisplayButton);
         CacheButtonListener cacheListener = new CacheButtonListener();
         cacheButton.setOnClickListener(cacheListener);
-
-        // disable the display button until subreddit data has been cached
-        displayButton.setEnabled(false);
+        cacheButton.setEnabled(false);
 
         subredditsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -70,6 +73,13 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
                 } else {
                     checkedSubreddits.remove(checkedTextView.getText().toString());
                     Log.i(TAG, checkedSubreddits.toString());
+                }
+
+                if (checkedSubreddits.size() > 0) {
+                    cacheButton.setEnabled(true);
+                }
+                else {
+                    cacheButton.setEnabled(false);
                 }
 
             }
@@ -88,11 +98,21 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
         Cursor Post;
 
         for (int i = 0; i < checkedSubreddits.size(); i++) {
+
             database.addSubreddit(checkedSubreddits.get(i));
             List<RedditLink> subredditInfo = redditLinks.get(i);
-            for (RedditLink links : subredditInfo) {
-                database.addPost(links.getTitle(), links.getAuthor(), links.getSubreddit(), links.getNum_comments(), i);
+
+            Object[] byteArrays = arrayofByteArrays.get(i);
+            for (int j = 0; j < subredditInfo.size(); j++) {
+                if (byteArrays[j] instanceof byte[]) {
+                    byte[] thumbnailImage = (byte[]) byteArrays[j];
+                    database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), thumbnailImage, i);
+                }
+                else {
+                    database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), null, i);
+                }
             }
+
             Subreddit = database.getSubreddits();
             Post = database.getPosts(i);
             Subreddit.moveToPosition(i);
@@ -107,16 +127,11 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
         database.close();
     }
 
+
     private class CacheButtonListener implements View.OnClickListener {
 
         @Override
         public void onClick(View view) {
-
-            //enable the display button when the subreddit string contains a value
-            if (checkedSubreddits.size() > 0) {
-                displayButton.setEnabled(true);
-            }
-
             ConnectToReddit connection = new ConnectToReddit();
             connection.execute();
         }
@@ -129,6 +144,7 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
         protected ArrayList<List<RedditLink>> doInBackground(Object... objects) {
 
            listofSubreddits = new ArrayList<List<RedditLink>>();
+           arrayofByteArrays = new ArrayList<Object[]>();
 
             // Create raw4j Reddit object
             Reddit redditInstance = new Reddit("RedditUnderground");
@@ -149,6 +165,26 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
                     Log.e(TAG, "Exception: " + e);
                 }
             }
+
+            for (int i = 0; i < checkedSubreddits.size(); i++) {
+
+                Object[] byteArrays = new Object[26];
+                List<RedditLink> posts = listofSubreddits.get(i);
+
+                for (int j = 0; j < listofSubreddits.get(i).size(); j++) {
+
+                    byte[] bytes = getThumbnail(posts.get(j).getThumbnail());
+                    if (bytes != null) {
+                        byteArrays[j] = bytes;
+                    }
+                    else {
+                        byteArrays[j] = -1;
+                    }
+                }
+
+                arrayofByteArrays.add(byteArrays);
+            }
+
             return listofSubreddits;
         }
 
@@ -158,6 +194,28 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
             updateDatabase(redditPosts);
         }
 
+    }
+
+    // Converts the thumbnail URL from the RedditLink object into a byte[] that can be stored in the
+    // SQLite database
+    private byte[] getThumbnail(String url){
+        try {
+            URL imageUrl = new URL(url);
+            URLConnection ucon = imageUrl.openConnection();
+
+            InputStream is = ucon.getInputStream();
+            BufferedInputStream bis = new BufferedInputStream(is);
+
+            ByteArrayBuffer baf = new ByteArrayBuffer(500);
+            int current = 0;
+            while ((current = bis.read()) != -1) {
+                baf.append((byte) current);
+            }
+            return baf.toByteArray();
+        } catch (Exception e) {
+            Log.i(TAG, "Error: " + e.toString());
+        }
+        return null;
     }
 }
 

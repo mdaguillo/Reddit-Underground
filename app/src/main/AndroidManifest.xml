@@ -33,11 +33,11 @@
         </activity>
         <activity
             android:name=".SubredditsSelectionScreen"
-            android:label="Reddit Underground">
+            android:label="Select Subreddits to Cache">
         </activity>
         <activity
             android:name=".SavedSubredditsScreen"
-            android:label="Reddit Underground">
+            android:label="Your Stored Subreddits">
         </activity>
     </application>
 

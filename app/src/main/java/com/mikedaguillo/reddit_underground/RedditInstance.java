@@ -265,8 +265,15 @@ public class RedditInstance extends ActionBarActivity {
                     postSubReddit.setText(cursor.getString(3));
                     postComments.setText("Comments: " + cursor.getInt(4));
 
-                    Bitmap default_image = BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.default_reddit_icon);
-                    postThumbnail.setImageBitmap(default_image);
+                    try {
+                        // retrieve the thumbnail from the database
+                        postThumbnail.setImageBitmap(BitmapFactory.decodeByteArray(cursor.getBlob(5), 0, cursor.getBlob(5).length));
+                    }
+                    catch(Exception e) {
+                        // use the default image
+                        Bitmap default_image = BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.default_reddit_icon);
+                        postThumbnail.setImageBitmap(default_image);
+                    }
                     break;
             }
 
