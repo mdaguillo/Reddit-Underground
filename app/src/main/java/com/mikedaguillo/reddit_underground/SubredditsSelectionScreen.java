@@ -312,7 +312,8 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
     }
 
     // Converts an image from the RedditLink object into a byte[] that can be stored in the
-    // SQLite database
+    // SQLite database. Calculates the size of the image first, then scales it down
+    // if necessary. Scaling and compression necessary to reduce memory leaks and heap overloads
     private byte[] getByteArray(String url){
         try {
             URL imageUrl = new URL(url);
@@ -321,15 +322,52 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
             InputStream is = ucon.getInputStream();
             BufferedInputStream bis = new BufferedInputStream(is);
 
-            Bitmap image = BitmapFactory.decodeStream(bis);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+
+            // First decode with inJustDecodeBounds=true to check dimensions
+            BitmapFactory.decodeStream(bis, null, options);
+            bis.reset();
+
+            // Calculate inSampleSize
+            options.inSampleSize = calculateInSampleSize(options, 800, 600);
+
+            // Decode bitmap with inSampleSize set to compress image
+            options.inJustDecodeBounds = false;
+            Bitmap image = BitmapFactory.decodeStream(bis, null, options);
+
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            image.compress(Bitmap.CompressFormat.JPEG, 60, outputStream);
+            image.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
 
             return outputStream.toByteArray();
         } catch (Exception e) {
             Log.i(TAG, "Error: " + e.toString());
         }
         return null;
+    }
+
+    // Used to determine the sampleSize integar that the BitmapFactory.Options object uses to
+    // to help scale the image in the getByteArray function
+    private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
     }
 }
 
