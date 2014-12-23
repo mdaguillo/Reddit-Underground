@@ -50,11 +50,11 @@ public class SavedSubredditsScreen extends ActionBarActivity{
                 savedSubreddits.add(cursor.getString(1));
                 cursor.moveToNext();
             }
-            cursor.close();
         }
         else {
             Log.i(TAG, "Cursor returned 0 items");
         }
+        cursor.close();
         return savedSubreddits;
     }
 
