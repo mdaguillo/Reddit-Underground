@@ -225,12 +225,12 @@ public class Reddit {
 		final List<String> pathSegments 		= new ArrayList<String>(2);
 		final Map<String, String> queryParams = new HashMap<String, String>(1);
 		
-		pathSegments.add(RedditApiResourceConstants.R);
-		pathSegments.add(subreddit);
-		pathSegments.add(RedditApiResourceConstants.COMMENTS);
-		pathSegments.add(linkId + RedditApiResourceConstants.DOT_JSON);		
+		pathSegments.add(RedditApiResourceConstants.R); // "r"
+		pathSegments.add(subreddit); // subreddit
+		pathSegments.add(RedditApiResourceConstants.COMMENTS); // "comments"
+		pathSegments.add(linkId + RedditApiResourceConstants.DOT_JSON);	// ".json"
 		
-		queryParams.put(RedditApiParameterConstants.LIMIT, Integer.toString(limit));
+		queryParams.put(RedditApiParameterConstants.LIMIT, Integer.toString(limit)); // "limit" : the limit variable
 		
 		final RedditRequestInput requestInput 
 			= new RedditRequestInput(pathSegments, queryParams);

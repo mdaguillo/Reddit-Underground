@@ -19,6 +19,7 @@ public class SubredditsDatabaseHelper  extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "StoredSubredditsDatabase";
     private static final String SUBREDDIT_TABLE_NAME = "Subreddits";
     private static final String POSTS_TABLE_NAME = "Posts";
+    private static final String COMMENTS_TABLE_NAME = "Comments";
 
     public SubredditsDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -29,12 +30,14 @@ public class SubredditsDatabaseHelper  extends SQLiteOpenHelper {
         // sql string command to create a new table called subreddits with an id column and a name column
         sqLiteDatabase.execSQL("CREATE TABLE " + SUBREDDIT_TABLE_NAME + " (_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT);");
         sqLiteDatabase.execSQL("CREATE TABLE " + POSTS_TABLE_NAME + " (_id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, author TEXT, subreddit TEXT, numComments INTEGER, thumbnailBlob BLOB, imageBlob BLOB, subredditID INTEGER, FOREIGN KEY(subredditID) REFERENCES " + SUBREDDIT_TABLE_NAME + "(_id));");
+        sqLiteDatabase.execSQL("CREATE TABLE " + COMMENTS_TABLE_NAME + " (_id INTEGER PRIMARY KEY AUTOINCREMENT, author TEXT, body TEXT, postTitle TEXT, ups INTEGER, downs INTEGER, postID INTEGER, FOREIGN KEY(postID) REFERENCES " + POSTS_TABLE_NAME + "(_id));");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SUBREDDIT_TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + POSTS_TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + COMMENTS_TABLE_NAME);
         onCreate(sqLiteDatabase);
     }
 
@@ -49,7 +52,7 @@ public class SubredditsDatabaseHelper  extends SQLiteOpenHelper {
     }
 
     public void addPost(String title, String author, String subreddit, int numComments, byte[] thumbnail, byte[] image, int subredditID) {
-        ContentValues values = new ContentValues(5);
+        ContentValues values = new ContentValues(7);
         values.put("title", title);
         values.put("author", author);
         values.put("subreddit", subreddit);
@@ -59,6 +62,18 @@ public class SubredditsDatabaseHelper  extends SQLiteOpenHelper {
         values.put("subredditID", subredditID);
 
         getWritableDatabase().insert(POSTS_TABLE_NAME, "title", values);
+    }
+
+    public void addComment (String author, String body, String postTitle, int ups, int downs, int postID) {
+        ContentValues values = new ContentValues(6);
+        values.put("author", author);
+        values.put("body", body);
+        values.put("postTitle", postTitle);
+        values.put("ups", ups);
+        values.put("downs", downs);
+        values.put("postID", postID);
+
+        getWritableDatabase().insert(COMMENTS_TABLE_NAME, "author", values);
     }
 
     public Cursor getSubreddits() {
@@ -76,11 +91,23 @@ public class SubredditsDatabaseHelper  extends SQLiteOpenHelper {
         return cursor;
     }
 
+    public Cursor getComments(int postID) {
+        Cursor cursor = getReadableDatabase().rawQuery("select * from " + COMMENTS_TABLE_NAME + " where postID = " + postID, null);
+        return cursor;
+    }
+
+    public Cursor getComments(String postTitle) {
+        Cursor cursor = getReadableDatabase().rawQuery("select * from " + COMMENTS_TABLE_NAME + " where postTitle = \"" + postTitle + "\"", null);
+        return cursor;
+    }
+
     public void deleteAll() {
         getWritableDatabase().delete(SUBREDDIT_TABLE_NAME, null, null);
         getWritableDatabase().delete(POSTS_TABLE_NAME, null, null);
+        getWritableDatabase().delete(COMMENTS_TABLE_NAME, null, null);
         getWritableDatabase().execSQL("delete from sqlite_sequence where name='"+ SUBREDDIT_TABLE_NAME + "';");
         getWritableDatabase().execSQL("delete from sqlite_sequence where name='"+ POSTS_TABLE_NAME + "';");
+        getWritableDatabase().execSQL("delete from sqlite_sequence where name='"+ COMMENTS_TABLE_NAME + "';");
     }
 
 }

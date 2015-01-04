@@ -18,10 +18,11 @@ import android.widget.ListView;
 
 import com.cd.reddit.Reddit;
 import com.cd.reddit.RedditException;
+import com.cd.reddit.json.mapping.RedditComment;
 import com.cd.reddit.json.mapping.RedditLink;
+import com.cd.reddit.json.util.RedditComments;
 import com.mikedaguillo.reddit_underground.SubredditDatabaseModel.SubredditsDatabaseHelper;
 
-import org.apache.http.util.ByteArrayBuffer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,12 +36,18 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Created by Mike on 12/10/2014.
+ *
+ * Selection Screen to download and store the data retreived from reddit in a local SQLite
+ * database. There is an async task that does all of the web related tasks necessary to retreive
+ * the data from Reddit. Then there is an update database task that takes the information stored
+ * in local variables and permanently stores it into the database for quick and easy retrieval
+ * in the other activities.
+ *
  */
 public class SubredditsSelectionScreen extends ActionBarActivity {
 
@@ -49,6 +56,7 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
     private ArrayList<String> subreddits;
     private ArrayList<String> checkedSubreddits;
     private ArrayList<List<RedditLink>> listofSubreddits; // array list to store the data returned from reddit
+    private ArrayList<RedditComments> listofComments; // array list to store the comments for each post
     private ArrayList<Object[]> arrayofThumbnailByteArrays;
     private ArrayList<Object[]> arrayofImageByteArrays;
     public static final String TAG = SubredditsSelectionScreen.class.getSimpleName(); //Tag for error messages
@@ -56,11 +64,13 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
 
     // For accessing the application database
     private SubredditsDatabaseHelper database;
+    public Reddit redditInstance;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.subreddit_selector_screen);
 
+        // Grab the list of subreddits from the logged in user
         Intent intent = getIntent();
         subreddits = intent.getStringArrayListExtra("Subreddits");
         checkedSubreddits = new ArrayList<String>();
@@ -73,6 +83,7 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
         cacheButton.setOnClickListener(cacheListener);
         cacheButton.setEnabled(false);
 
+
         subredditsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -82,13 +93,11 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
 
                 if (checkedTextView.isChecked()) {
                     checkedSubreddits.add(checkedTextView.getText().toString());
-                    Log.i(TAG, checkedTextView.getText().toString());
-                    Log.i(TAG, checkedSubreddits.toString());
                 } else {
                     checkedSubreddits.remove(checkedTextView.getText().toString());
-                    Log.i(TAG, checkedSubreddits.toString());
                 }
 
+                // Enable the cache button only if there has been a selection
                 if (checkedSubreddits.size() > 0) {
                     cacheButton.setEnabled(true);
                 }
@@ -102,23 +111,38 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_multiple_choice, android.R.id.text1, subreddits);
         subredditsListView.setAdapter(adapter);
 
+        // To access the internal database and the Reddit server
         database = new SubredditsDatabaseHelper(this);
+        redditInstance = new Reddit("RedditUnderground");
     }
 
+    // Called after the async task is completed to update the internal database with
+    // the information retrieved from reddit.
     private void updateDatabase(ArrayList<List<RedditLink>> redditLinks) {
         Log.i(TAG, "Executing updateDatabase");
         database.deleteAll();
         Cursor Subreddit;
         Cursor Post;
+        Cursor Comment;
 
+        // Iterate through all of the subreddits selected
         for (int i = 0; i < checkedSubreddits.size(); i++) {
 
+            // Add the current subreddit to the sqlite subreddit table
             database.addSubreddit(checkedSubreddits.get(i));
+
+            // Grab the list of posts from the current subreddit
             List<RedditLink> subredditInfo = redditLinks.get(i);
 
+            // Grab the image and thumbnail byte arrays to store into the database.
+            // The arrays are object arrays, because if there was no thumbnail or image, a -1
+            // placeholder is used instead
             Object[] thumbnailByteArrays = arrayofThumbnailByteArrays.get(i);
             Object[] imageByteArrays = arrayofImageByteArrays.get(i);
 
+            // Iterate through the posts and add them into the posts database table
+            // Four scenarios need to be checked, whether the bytearrays have -1 at the position
+            // or if one is -1 and the other not, or if they both contain data.
             for (int j = 0; j < subredditInfo.size(); j++) {
                 if (thumbnailByteArrays[j] instanceof byte[] && imageByteArrays[j] instanceof  byte[]) {
                     byte[] thumbnailImage = (byte[]) thumbnailByteArrays[j];
@@ -136,15 +160,32 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
                 else {
                     database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), null, null, i);
                 }
+
+                // Retrieve the comments for each post that have been stored in the comments array
+                // TODO create a better way to determine the current position, may not be 26 each time
+                int currentPostPosition = ((j) + (26*i));
+                for (RedditComment comment : listofComments.get(currentPostPosition).getComments()) {
+                    database.addComment(comment.getAuthor(), comment.getBody(), subredditInfo.get(j).getTitle(), comment.getUps(), comment.getDowns(), currentPostPosition);
+                }
             }
 
+            // Chunk of code to print values from the database to make sure information is
+            // Storing properly.
             Subreddit = database.getSubreddits();
             Post = database.getPosts(i);
             Subreddit.moveToPosition(i);
             Post.moveToFirst();
             Log.i(TAG, "Added the subreddit: " + Subreddit.getString(1) + " to the sqlite database, at position " + Subreddit.getString(0));
             while (!Post.isAfterLast()) {
-                Log.i(TAG, Post.getString(3));
+                Log.i(TAG, Post.getString(1));
+                int postPosition = Post.getInt(0);
+                Comment = database.getComments(Post.getString(1));
+                Comment.moveToFirst();
+                while (!Comment.isAfterLast()) {
+                    int commentPosition = Comment.getInt(0);
+                    Log.i(TAG, Comment.getString(2));
+                    Comment.moveToNext();
+                }
                 Post.moveToNext();
             }
         }
@@ -165,7 +206,7 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
         @Override
         public void onClick(View view) {
             dialog = ProgressDialog.show(SubredditsSelectionScreen.this, "", "Please wait while the data downloads", true);
-            ConnectToReddit connection = new ConnectToReddit();
+            ConnectToReddit connection = new ConnectToReddit(redditInstance);
             connection.execute();
         }
     }
@@ -173,19 +214,25 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
     //custom AsyncTask to run in the background to grab data from Reddit
     private class ConnectToReddit extends AsyncTask<Object, Void, ArrayList<List<RedditLink>>> {
 
+        Reddit redditInstance;
+
+        public ConnectToReddit(Reddit reddit) {
+            redditInstance = reddit;
+        }
+
         @Override
         protected ArrayList<List<RedditLink>> doInBackground(Object... objects) {
 
-           listofSubreddits = new ArrayList<List<RedditLink>>();
-           arrayofThumbnailByteArrays = new ArrayList<Object[]>();
-           arrayofImageByteArrays = new ArrayList<Object[]>();
-
-            // Create raw4j Reddit object
-            Reddit redditInstance = new Reddit("RedditUnderground");
+            // Arrays to store the information from reddit to be accessed from the other
+            // SubredditsSelectionScreen class
+            listofSubreddits = new ArrayList<List<RedditLink>>();
+            arrayofThumbnailByteArrays = new ArrayList<Object[]>();
+            arrayofImageByteArrays = new ArrayList<Object[]>();
+            listofComments = new ArrayList<RedditComments>();
 
             for (String subreddit : checkedSubreddits) {
                 try {
-                    // Grab the raw4j data structure that stores the JSON data for a list of posts in a subreddit
+                    // Grab the List<RedditLink> data structure that stores the JSON data for a list of posts in a subreddit
                     List<RedditLink> subRedditListing = redditInstance.listingFor(subreddit, "hot");
                     try {
                         listofSubreddits.add(subRedditListing);
@@ -194,19 +241,34 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
                         Log.e(TAG, "Exception: " + e);
                     }
                     Log.i(TAG, "Storing subreddits with their data in the array");
-
                 } catch (RedditException e) {
                     Log.e(TAG, "Exception: " + e);
                 }
             }
 
+            // Iterate through each of the checked subreddits and grab the thumbnail,
+            // the image, and the comments for each post
             for (int i = 0; i < checkedSubreddits.size(); i++) {
 
                 Object[] thumbnailByteArrays = new Object[26];
                 Object[] imageByteArrrays = new Object[26];
                 List<RedditLink> posts = listofSubreddits.get(i);
 
-                for (int j = 0; j < listofSubreddits.get(i).size(); j++) {
+                for (int j = 0; j < posts.size(); j++) {
+
+                    // Attempt to grab the comments from Reddit for each post
+                    // Store the retrieved data the comments table in the database
+                    RedditComments theComments = null;
+
+                    // Infinite loop to make sure the comments are returning the proper amount
+                    do {
+                        try {
+                            theComments = redditInstance.commentsFor(posts.get(j).getSubreddit(), posts.get(j).getId(), 3);
+                            listofComments.add(theComments);
+                        } catch (RedditException e) {
+                            Log.e(TAG, "An error occurred trying to get the comments" + e);
+                        }
+                    } while (theComments.getComments().size() < 3);
 
                     byte[] thumbnailBytes = getByteArray(posts.get(j).getThumbnail());
                     byte[] imageBytes = null;

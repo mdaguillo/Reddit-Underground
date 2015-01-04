@@ -328,7 +328,8 @@ public class RedditJsonParser {
 		
 		//See the 'replies' attribute of RedditComment. It is a JsonNode
 		final List<RedditLink> theParentLink	   = (List<RedditLink>) parseSpecificType(parentLinkNode, RedditJsonConstants.TYPE_LINK);
-		final List<RedditComment> topLevelComments = (List<RedditComment>) parseSpecificType(rootNode, RedditJsonConstants.TYPE_COMMENT);		
+		//final List<RedditComment> topLevelComments = (List<RedditComment>) parseSpecificType(rootNode, RedditJsonConstants.TYPE_COMMENT);
+        final List<RedditComment> topLevelComments = (List<RedditComment>) parseSpecificType(commentsNode, RedditJsonConstants.TYPE_COMMENT);
 
 		if(moreExists){
 			final RedditMore theMore;
