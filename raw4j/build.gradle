@@ -4,8 +4,10 @@ repositories {
     mavenCentral()
 }
 
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile files('libs/jackson-all-1.9.0.jar')
     compile files('libs/commons-io-2.4.jar')
     compile files('libs/commons-lang3-3.3.2.jar')

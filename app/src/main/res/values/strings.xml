@@ -8,5 +8,6 @@
     <string name="cache_button">Cache Subreddit Data</string>
     <string name="display_button">Display</string>
     <string name="user_login_text">Login To Your Reddit Account</string>
+    <string name="delete_all">Delete All</string>
 
 </resources>

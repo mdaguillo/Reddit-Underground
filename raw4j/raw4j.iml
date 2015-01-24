@@ -26,9 +26,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" exported="" name="jackson-all-1.9.0" level="project" />
     <orderEntry type="library" exported="" name="commons-io-2.4" level="project" />
     <orderEntry type="library" exported="" name="commons-lang3-3.3.2" level="project" />
-    <orderEntry type="library" exported="" name="jackson-all-1.9.0" level="project" />
   </component>
 </module>
 

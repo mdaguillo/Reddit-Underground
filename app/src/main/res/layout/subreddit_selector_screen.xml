@@ -27,5 +27,11 @@
             android:text="@string/cache_button"
             android:id="@+id/subredditCacheButton"/>
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/delete_all"
+            android:id="@+id/deleteAllButton"/>
+
     </LinearLayout>
 </LinearLayout>

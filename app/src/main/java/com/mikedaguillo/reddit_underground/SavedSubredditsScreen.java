@@ -54,7 +54,7 @@ public class SavedSubredditsScreen extends ActionBarActivity{
         else {
             Log.i(TAG, "Cursor returned 0 items");
         }
-        cursor.close();
+        databaseHelper.close();
         return savedSubreddits;
     }
 
@@ -64,7 +64,6 @@ public class SavedSubredditsScreen extends ActionBarActivity{
         public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
             Intent intent = new Intent(view.getContext(), RedditInstance.class);
             intent.putExtra("Stored_Subreddit", savedSubreddits.get(position));
-            intent.putExtra("Intent_Int", 2);
             startActivity(intent);
         }
     }

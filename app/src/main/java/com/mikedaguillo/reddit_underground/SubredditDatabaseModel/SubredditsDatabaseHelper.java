@@ -5,8 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.sql.Blob;
+import java.util.ArrayList;
 
 /**
  * Created by Mike on 12/14/2014.
@@ -48,6 +50,7 @@ public class SubredditsDatabaseHelper  extends SQLiteOpenHelper {
 
         // call getWritableDatabase and insert in the "Subreddits" table, under the "name" column the
         // values in the ContentValues object
+        
         getWritableDatabase().insert(SUBREDDIT_TABLE_NAME, "name", values);
     }
 
@@ -105,9 +108,35 @@ public class SubredditsDatabaseHelper  extends SQLiteOpenHelper {
         getWritableDatabase().delete(SUBREDDIT_TABLE_NAME, null, null);
         getWritableDatabase().delete(POSTS_TABLE_NAME, null, null);
         getWritableDatabase().delete(COMMENTS_TABLE_NAME, null, null);
-        getWritableDatabase().execSQL("delete from sqlite_sequence where name='"+ SUBREDDIT_TABLE_NAME + "';");
-        getWritableDatabase().execSQL("delete from sqlite_sequence where name='"+ POSTS_TABLE_NAME + "';");
-        getWritableDatabase().execSQL("delete from sqlite_sequence where name='"+ COMMENTS_TABLE_NAME + "';");
+    }
+
+    public void deleteSubreddit(String subreddit) {
+        try{
+            String[] sub = new String[] {subreddit};
+            getWritableDatabase().delete(SUBREDDIT_TABLE_NAME, "name = ?", sub);
+
+            // Necessary to delete the comments that are tied to each post
+            // Collects all of the Posts id's in the Posts tables, which is the foreign key
+            // In the comments table that ties a comment to a post.
+            Cursor cursor = getReadableDatabase().rawQuery("select _id from " + POSTS_TABLE_NAME + " where subreddit = \"" + subreddit + "\"", null);
+            ArrayList<String> postIDs = new ArrayList<String>();
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                postIDs.add(Integer.toString(cursor.getInt(0)));
+            }
+            String[] posts = new String[postIDs.size()];
+            posts = postIDs.toArray(posts);
+
+            // Now we can delete the posts from their table
+            getWritableDatabase().delete(POSTS_TABLE_NAME, "subreddit = ?", sub);
+
+            // Finally we delete the rogue comments that no longer
+            // have a post associated with them
+            getReadableDatabase().delete(COMMENTS_TABLE_NAME, "postID = ?", posts);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

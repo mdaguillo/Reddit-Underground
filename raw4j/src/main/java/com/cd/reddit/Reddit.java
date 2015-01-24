@@ -1,12 +1,9 @@
 /*
 Copyright 2013 Cory Dissinger
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at 
-
 http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 */
@@ -43,26 +40,26 @@ import com.cd.reddit.json.util.RedditComments;
  *  Please see the <a href="https://github.com/corydissinger/raw4j/blob/master/IMPLEMENTED_CALLS.md">Github Markdown</a> for full code examples.
  * <br/> 
  * <br/>
- * 
+ *
  * @see <a href="http://www.reddit.com/dev/api">Reddit's Full, Live Built-In Documentation</a>
- * 
+ *
  * @author <a href="https://github.com/corydissinger">Cory Dissinger</a>
  * @author <a href="https://github.com/ifrins">Francesc Bruguera</a>
  * @author <a href="https://github.com/wizang">Lucas Hill</a>
  *
  */
 public class Reddit {
-	private final RedditRequestor requestor;
-	
-	/**
-	 * @param userAgent The user agent to set
-	 */
-	public Reddit(String userAgent){
-        requestor = new RedditRequestor(userAgent);		
-	}
-        
+    private final RedditRequestor requestor;
+
     /**
-     * 
+     * @param userAgent The user agent to set
+     */
+    public Reddit(String userAgent){
+        requestor = new RedditRequestor(userAgent);
+    }
+
+    /**
+     *
      * @param userAgent The user agent to set
      * @param session The reddit session id to pass to the <code>RedditRequestor</code>
      */
@@ -70,41 +67,41 @@ public class Reddit {
         requestor = new RedditRequestor(userAgent);
         requestor.setSession(session);
     }
-        
+
     /**
      * Once this method is called the cookie returned is set as the session and will be added to all future calls
-     * 
+     *
      * @param userName Username of the reddit account
      * @param password Password of the reddit acount
      * @return A <code>RedditJsonMessage</code>
-     * @throws RedditException 
+     * @throws RedditException
      */
-	public RedditJsonMessage login(final String userName, final String password) throws RedditException{
-		final List<String> path = new ArrayList<String>(2);
-		final Map<String, String> form = new HashMap<String, String>(2);
-		
-		path.add(RedditApiResourceConstants.API);
-		path.add(RedditApiResourceConstants.LOGIN);
+    public RedditJsonMessage login(final String userName, final String password) throws RedditException{
+        final List<String> path = new ArrayList<String>(2);
+        final Map<String, String> form = new HashMap<String, String>(2);
 
-		form.put(RedditApiParameterConstants.API_TYPE, RedditApiParameterConstants.JSON);		
-		form.put(RedditApiParameterConstants.USER, userName);
-		form.put(RedditApiParameterConstants.PASSWD, password);
-		
-		final RedditRequestInput requestInput = new RedditRequestInput(path, null, form);
-		final RedditRequestResponse response = requestor.executePost(requestInput);
-		
-		final RedditJsonParser parser = new RedditJsonParser(response.getBody());
-		final RedditJsonMessage message = parser.parseJsonMessage();
-		
-		if(!message.getErrors().isEmpty()){
-			throw new RedditException("Got errors while logging in: " + message.toString());
-		}
-		
+        path.add(RedditApiResourceConstants.API);
+        path.add(RedditApiResourceConstants.LOGIN);
+
+        form.put(RedditApiParameterConstants.API_TYPE, RedditApiParameterConstants.JSON);
+        form.put(RedditApiParameterConstants.USER, userName);
+        form.put(RedditApiParameterConstants.PASSWD, password);
+
+        final RedditRequestInput requestInput = new RedditRequestInput(path, null, form);
+        final RedditRequestResponse response = requestor.executePost(requestInput);
+
+        final RedditJsonParser parser = new RedditJsonParser(response.getBody());
+        final RedditJsonMessage message = parser.parseJsonMessage();
+
+        if(!message.getErrors().isEmpty()){
+            throw new RedditException("Got errors while logging in: " + message.toString());
+        }
+
         requestor.setSession(message.getCookie());
         requestor.setModhashHeader(message.getModhash());
-        
-		return message;
-	}
+
+        return message;
+    }
 
     public RedditJsonMessage newCaptcha() throws RedditException {
         final List<String> path = new ArrayList<String>(2);
@@ -128,40 +125,40 @@ public class Reddit {
         return message;
     }
 
-	
-	public RedditAccount meJson() throws RedditException{
-		final List<String> path = new ArrayList<String>(2);
-		
-		path.add(RedditApiResourceConstants.API);
-		path.add(RedditApiResourceConstants.ME_JSON);		
-		
-		final RedditRequestInput requestInput = new RedditRequestInput(path);
-		final RedditRequestResponse response = requestor.executeGet(requestInput);
-		
-		final RedditJsonParser parser = new RedditJsonParser(response.getBody());
-		final RedditAccount account = parser.parseAccounts().get(0);
-		
+
+    public RedditAccount meJson() throws RedditException{
+        final List<String> path = new ArrayList<String>(2);
+
+        path.add(RedditApiResourceConstants.API);
+        path.add(RedditApiResourceConstants.ME_JSON);
+
+        final RedditRequestInput requestInput = new RedditRequestInput(path);
+        final RedditRequestResponse response = requestor.executeGet(requestInput);
+
+        final RedditJsonParser parser = new RedditJsonParser(response.getBody());
+        final RedditAccount account = parser.parseAccounts().get(0);
+
         requestor.setModhashHeader(account.getModhash());
-		
-		return account;
-	}
-	
-	//See Reddit's built-in documentation for more detailed info: http://www.reddit.com/dev/api#GET_subreddits_{where}
-	public List<RedditSubreddit> subreddits(String byGrouping) throws RedditException{
-		final List<String> path = new ArrayList<String>(2);
-		
-		path.add(RedditApiResourceConstants.SUBREDDITS);
-		path.add(byGrouping + RedditApiResourceConstants.DOT_JSON);
-		
-		final RedditRequestInput requestInput = new RedditRequestInput(path);
-		final RedditRequestResponse response = requestor.executeGet(requestInput);
-		
-		RedditJsonParser parser = new RedditJsonParser(response.getBody());
-		return parser.parseSubreddits();
-	}
+
+        return account;
+    }
 
     //See Reddit's built-in documentation for more detailed info: http://www.reddit.com/dev/api#GET_subreddits_{where}
-    //Added ability to include the number of subreddits to pull (limit)
+    public List<RedditSubreddit> subreddits(String byGrouping) throws RedditException{
+        final List<String> path = new ArrayList<String>(2);
+
+        path.add(RedditApiResourceConstants.SUBREDDITS);
+        path.add(byGrouping + RedditApiResourceConstants.DOT_JSON);
+
+        final RedditRequestInput requestInput = new RedditRequestInput(path);
+        final RedditRequestResponse response = requestor.executeGet(requestInput);
+
+        RedditJsonParser parser = new RedditJsonParser(response.getBody());
+        return parser.parseSubreddits();
+    }
+
+    //See Reddit's built-in documentation for more detailed info: http://www.reddit.com/dev/api#GET_subreddits_{where}
+    // Added ability to include the number of subreddits to pull (limit)
     public List<RedditSubreddit> subreddits(String byGrouping, int limit) throws RedditException{
         final List<String> path = new ArrayList<String>(2);
 
@@ -174,142 +171,142 @@ public class Reddit {
         RedditJsonParser parser = new RedditJsonParser(response.getBody());
         return parser.parseSubreddits();
     }
-	
-	public List<RedditLink> listingFor(final String subreddit, final String listingType) throws RedditException{
-		final List<String> pathSegments = new ArrayList<String>(3);
 
-		pathSegments.add(RedditApiResourceConstants.R);
-		pathSegments.add(subreddit);		
-		pathSegments.add(listingType + RedditApiResourceConstants.DOT_JSON);
-		
-		final RedditRequestInput requestInput 
-			= new RedditRequestInput(pathSegments);
-		
-		final RedditRequestResponse response = requestor.executeGet(requestInput);
-		
-		final RedditJsonParser parser = new RedditJsonParser(response.getBody());
-		
-		return parser.parseLinks();
-	}
+    public List<RedditLink> listingFor(final String subreddit, final String listingType) throws RedditException{
+        final List<String> pathSegments = new ArrayList<String>(3);
 
-	//TODO: The can of worms begins here. Check example-morechildren.json to see what I mean.
-	public List<RedditComment> moreChildrenFor(RedditComments theComments, String desiredSort) throws RedditException{
-		final List<String> pathSegments = new ArrayList<String>(2);
-		final Map<String, String> form = new HashMap<String, String>(2);
-		
-		pathSegments.add(RedditApiResourceConstants.API);
-		pathSegments.add(RedditApiResourceConstants.MORECHILDREN);
+        pathSegments.add(RedditApiResourceConstants.R);
+        pathSegments.add(subreddit);
+        pathSegments.add(listingType + RedditApiResourceConstants.DOT_JSON);
 
-		final List<String> childrenList = theComments.getMore().getChildren();
-		final String linkId 			= theComments.getParentLink().getName();
-		
-		form.put(RedditApiParameterConstants.API_TYPE, RedditApiParameterConstants.JSON);		
-		form.put(RedditApiParameterConstants.CHILDREN, StringUtils.join(childrenList.iterator(), ","));
-		form.put(RedditApiParameterConstants.LINK_ID, linkId);
-
-		final RedditRequestInput requestInput = new RedditRequestInput(pathSegments, null, form);
-		
-		final RedditRequestResponse response = requestor.executePost(requestInput);
-		
-		final RedditJsonParser parser = new RedditJsonParser(response.getBody());
-		System.out.println();
-		
-		return parser.parseMoreChildren();
-	}	
-
-	public RedditComments commentsFor(final String subreddit, final String linkId) throws RedditException{
-		return commentsFor(subreddit, linkId, 10);
-	}	
-	
-	public RedditComments commentsFor(final String subreddit, final String linkId, final int limit) throws RedditException{
-		final List<String> pathSegments 		= new ArrayList<String>(2);
-		final Map<String, String> queryParams = new HashMap<String, String>(1);
-		
-		pathSegments.add(RedditApiResourceConstants.R); // "r"
-		pathSegments.add(subreddit); // subreddit
-		pathSegments.add(RedditApiResourceConstants.COMMENTS); // "comments"
-		pathSegments.add(linkId + RedditApiResourceConstants.DOT_JSON);	// ".json"
-		
-		queryParams.put(RedditApiParameterConstants.LIMIT, Integer.toString(limit)); // "limit" : the limit variable
-		
-		final RedditRequestInput requestInput 
-			= new RedditRequestInput(pathSegments, queryParams);
-		
-		final RedditRequestResponse response = requestor.executeGet(requestInput);
-		
-		final RedditJsonParser parser = new RedditJsonParser(response.getBody());
-		
-		return parser.parseComments(limit);
-	}	
-	
-	//TODO: Is this always a Link?
-	public List<RedditLink> infoForId(final String id) throws RedditException{
-		final List<String> pathSegments = new ArrayList<String>(2);
-		final Map<String, String> queryParams = new HashMap<String, String>(1);
-		
-		pathSegments.add(RedditApiResourceConstants.API);
-		pathSegments.add(RedditApiResourceConstants.INFO + RedditApiResourceConstants.DOT_JSON);		
-		
-		queryParams.put(RedditApiParameterConstants.ID, id);
-		
-		final RedditRequestInput requestInput 
-			= new RedditRequestInput(pathSegments, queryParams);
-		
-		final RedditRequestResponse response = requestor.executeGet(requestInput);
-		
-		final RedditJsonParser parser = new RedditJsonParser(response.getBody());
-		
-		return parser.parseLinks();
-	}
-	
-	public RedditJsonMessage comment(String rawMarkdown, String parentId) throws RedditException{
-		final List<String> pathSegments = new ArrayList<String>(2);
-		final Map<String, String> form = new HashMap<String, String>(3);
-		
-		pathSegments.add(RedditApiResourceConstants.API);
-		pathSegments.add(RedditApiResourceConstants.COMMENT);
-
-		form.put(RedditApiParameterConstants.API_TYPE, RedditApiParameterConstants.JSON);		
-		form.put(RedditApiParameterConstants.TEXT, rawMarkdown);
-		form.put(RedditApiParameterConstants.THING_ID, parentId);
-
-		final RedditRequestInput requestInput = new RedditRequestInput(pathSegments, null, form);
-		
-		final RedditRequestResponse response = requestor.executePost(requestInput);
-		
-		final RedditJsonParser parser = new RedditJsonParser(response.getBody());
-		
-		return parser.parseJsonMessage();
-	}
-
-	public void delete(String fullname) throws RedditException{
-		final List<String> pathSegments = new ArrayList<String>(2);
-		final Map<String, String> form = new HashMap<String, String>(2);
-		
-		pathSegments.add(RedditApiResourceConstants.API);
-		pathSegments.add(RedditApiResourceConstants.DEL);
-
-		form.put(RedditApiParameterConstants.API_TYPE, RedditApiParameterConstants.JSON);		
-		form.put(RedditApiParameterConstants.ID, fullname);
-
-		final RedditRequestInput requestInput = new RedditRequestInput(pathSegments, null, form);
-		
-		final RedditRequestResponse response = requestor.executePost(requestInput);
-	}
-	
-	
-    public List<RedditMessage> messages(String inboxType) throws RedditException {
-        final List<String> pathSegments = new ArrayList<String>(2);
-        
-        pathSegments.add(RedditApiResourceConstants.MESSAGE);
-        pathSegments.add(inboxType + RedditApiResourceConstants.DOT_JSON);
-        
         final RedditRequestInput requestInput
                 = new RedditRequestInput(pathSegments);
-        
+
+        final RedditRequestResponse response = requestor.executeGet(requestInput);
+
+        final RedditJsonParser parser = new RedditJsonParser(response.getBody());
+
+        return parser.parseLinks();
+    }
+
+    //TODO: The can of worms begins here. Check example-morechildren.json to see what I mean.
+    public List<RedditComment> moreChildrenFor(RedditComments theComments, String desiredSort) throws RedditException{
+        final List<String> pathSegments = new ArrayList<String>(2);
+        final Map<String, String> form = new HashMap<String, String>(2);
+
+        pathSegments.add(RedditApiResourceConstants.API);
+        pathSegments.add(RedditApiResourceConstants.MORECHILDREN);
+
+        final List<String> childrenList = theComments.getMore().getChildren();
+        final String linkId 			= theComments.getParentLink().getName();
+
+        form.put(RedditApiParameterConstants.API_TYPE, RedditApiParameterConstants.JSON);
+        form.put(RedditApiParameterConstants.CHILDREN, StringUtils.join(childrenList.iterator(), ","));
+        form.put(RedditApiParameterConstants.LINK_ID, linkId);
+
+        final RedditRequestInput requestInput = new RedditRequestInput(pathSegments, null, form);
+
+        final RedditRequestResponse response = requestor.executePost(requestInput);
+
+        final RedditJsonParser parser = new RedditJsonParser(response.getBody());
+        System.out.println();
+
+        return parser.parseMoreChildren();
+    }
+
+    public RedditComments commentsFor(final String subreddit, final String linkId) throws RedditException{
+        return commentsFor(subreddit, linkId, 10);
+    }
+
+    public RedditComments commentsFor(final String subreddit, final String linkId, final int limit) throws RedditException{
+        final List<String> pathSegments 		= new ArrayList<String>(2);
+        final Map<String, String> queryParams = new HashMap<String, String>(1);
+
+        pathSegments.add(RedditApiResourceConstants.R);
+        pathSegments.add(subreddit);
+        pathSegments.add(RedditApiResourceConstants.COMMENTS);
+        pathSegments.add(linkId + RedditApiResourceConstants.DOT_JSON);
+
+        queryParams.put(RedditApiParameterConstants.LIMIT, Integer.toString(limit));
+
+        final RedditRequestInput requestInput
+                = new RedditRequestInput(pathSegments, queryParams);
+
+        final RedditRequestResponse response = requestor.executeGet(requestInput);
+
+        final RedditJsonParser parser = new RedditJsonParser(response.getBody());
+
+        return parser.parseComments(limit);
+    }
+
+    //TODO: Is this always a Link?
+    public List<RedditLink> infoForId(final String id) throws RedditException{
+        final List<String> pathSegments = new ArrayList<String>(2);
+        final Map<String, String> queryParams = new HashMap<String, String>(1);
+
+        pathSegments.add(RedditApiResourceConstants.API);
+        pathSegments.add(RedditApiResourceConstants.INFO + RedditApiResourceConstants.DOT_JSON);
+
+        queryParams.put(RedditApiParameterConstants.ID, id);
+
+        final RedditRequestInput requestInput
+                = new RedditRequestInput(pathSegments, queryParams);
+
+        final RedditRequestResponse response = requestor.executeGet(requestInput);
+
+        final RedditJsonParser parser = new RedditJsonParser(response.getBody());
+
+        return parser.parseLinks();
+    }
+
+    public RedditJsonMessage comment(String rawMarkdown, String parentId) throws RedditException{
+        final List<String> pathSegments = new ArrayList<String>(2);
+        final Map<String, String> form = new HashMap<String, String>(3);
+
+        pathSegments.add(RedditApiResourceConstants.API);
+        pathSegments.add(RedditApiResourceConstants.COMMENT);
+
+        form.put(RedditApiParameterConstants.API_TYPE, RedditApiParameterConstants.JSON);
+        form.put(RedditApiParameterConstants.TEXT, rawMarkdown);
+        form.put(RedditApiParameterConstants.THING_ID, parentId);
+
+        final RedditRequestInput requestInput = new RedditRequestInput(pathSegments, null, form);
+
+        final RedditRequestResponse response = requestor.executePost(requestInput);
+
+        final RedditJsonParser parser = new RedditJsonParser(response.getBody());
+
+        return parser.parseJsonMessage();
+    }
+
+    public void delete(String fullname) throws RedditException{
+        final List<String> pathSegments = new ArrayList<String>(2);
+        final Map<String, String> form = new HashMap<String, String>(2);
+
+        pathSegments.add(RedditApiResourceConstants.API);
+        pathSegments.add(RedditApiResourceConstants.DEL);
+
+        form.put(RedditApiParameterConstants.API_TYPE, RedditApiParameterConstants.JSON);
+        form.put(RedditApiParameterConstants.ID, fullname);
+
+        final RedditRequestInput requestInput = new RedditRequestInput(pathSegments, null, form);
+
+        final RedditRequestResponse response = requestor.executePost(requestInput);
+    }
+
+
+    public List<RedditMessage> messages(String inboxType) throws RedditException {
+        final List<String> pathSegments = new ArrayList<String>(2);
+
+        pathSegments.add(RedditApiResourceConstants.MESSAGE);
+        pathSegments.add(inboxType + RedditApiResourceConstants.DOT_JSON);
+
+        final RedditRequestInput requestInput
+                = new RedditRequestInput(pathSegments);
+
         final RedditRequestResponse response = requestor.executeGet(requestInput);
         final RedditJsonParser parser = new RedditJsonParser(response.getBody());
-        
+
         return parser.parseMessages();
     }
 
@@ -387,22 +384,22 @@ public class Reddit {
             throw new RedditException("Username " + username + " does not exist.");
         }
     }
-    
-	public List<RedditLink> userHistory(String userName, 
-			String listingType) throws RedditException{
-		final List<String> pathSegments = new ArrayList<String>(3);
 
-		pathSegments.add(RedditApiResourceConstants.USER);
-		pathSegments.add(userName);		
-		pathSegments.add(listingType + RedditApiResourceConstants.DOT_JSON);
-		
-		final RedditRequestInput requestInput 
-			= new RedditRequestInput(pathSegments);
-		
-		final RedditRequestResponse response = requestor.executeGet(requestInput);
-		
-		final RedditJsonParser parser = new RedditJsonParser(response.getBody());
-		
-		return parser.parseLinks();
-	}
+    public List<RedditLink> userHistory(String userName,
+                                        String listingType) throws RedditException{
+        final List<String> pathSegments = new ArrayList<String>(3);
+
+        pathSegments.add(RedditApiResourceConstants.USER);
+        pathSegments.add(userName);
+        pathSegments.add(listingType + RedditApiResourceConstants.DOT_JSON);
+
+        final RedditRequestInput requestInput
+                = new RedditRequestInput(pathSegments);
+
+        final RedditRequestResponse response = requestor.executeGet(requestInput);
+
+        final RedditJsonParser parser = new RedditJsonParser(response.getBody());
+
+        return parser.parseLinks();
+    }
 }
