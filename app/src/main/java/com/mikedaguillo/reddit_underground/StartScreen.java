@@ -10,6 +10,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.mikedaguillo.reddit_underground.Utils.TinyDB;
+
 import java.util.ArrayList;
 
 public class StartScreen extends ActionBarActivity {

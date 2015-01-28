@@ -43,7 +43,7 @@ public class SubredditsDatabaseHelper  extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
-    public void addSubreddit(String name) {
+    public long addSubreddit(String name) {
         // place the name of the subreddit you want to add into a ContentValues object
         ContentValues values = new ContentValues(1);
         values.put("name", name);
@@ -51,10 +51,10 @@ public class SubredditsDatabaseHelper  extends SQLiteOpenHelper {
         // call getWritableDatabase and insert in the "Subreddits" table, under the "name" column the
         // values in the ContentValues object
         
-        getWritableDatabase().insert(SUBREDDIT_TABLE_NAME, "name", values);
+        return getWritableDatabase().insert(SUBREDDIT_TABLE_NAME, "name", values);
     }
 
-    public void addPost(String title, String author, String subreddit, int numComments, byte[] thumbnail, byte[] image, int subredditID) {
+    public long addPost(String title, String author, String subreddit, int numComments, byte[] thumbnail, byte[] image, int subredditID) {
         ContentValues values = new ContentValues(7);
         values.put("title", title);
         values.put("author", author);
@@ -64,10 +64,10 @@ public class SubredditsDatabaseHelper  extends SQLiteOpenHelper {
         values.put("imageBlob", image);
         values.put("subredditID", subredditID);
 
-        getWritableDatabase().insert(POSTS_TABLE_NAME, "title", values);
+        return getWritableDatabase().insert(POSTS_TABLE_NAME, "title", values);
     }
 
-    public void addComment (String author, String body, String postTitle, int ups, int downs, int postID) {
+    public long addComment (String author, String body, String postTitle, int ups, int downs, int postID) {
         ContentValues values = new ContentValues(6);
         values.put("author", author);
         values.put("body", body);
@@ -76,7 +76,7 @@ public class SubredditsDatabaseHelper  extends SQLiteOpenHelper {
         values.put("downs", downs);
         values.put("postID", postID);
 
-        getWritableDatabase().insert(COMMENTS_TABLE_NAME, "author", values);
+        return getWritableDatabase().insert(COMMENTS_TABLE_NAME, "author", values);
     }
 
     public Cursor getSubreddits() {

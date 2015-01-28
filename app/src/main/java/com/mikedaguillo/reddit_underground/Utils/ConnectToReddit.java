@@ -10,10 +10,12 @@ import android.util.Log;
 
 import com.cd.reddit.Reddit;
 import com.cd.reddit.RedditException;
+import com.cd.reddit.json.mapping.RedditComment;
 import com.cd.reddit.json.mapping.RedditLink;
 import com.cd.reddit.json.util.RedditComments;
 import com.mikedaguillo.reddit_underground.SubredditDatabaseModel.SubredditsDatabaseHelper;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -132,22 +134,33 @@ public class ConnectToReddit extends AsyncTask<Object, Void, ArrayList<List<Redd
 
             for (int j = 0; j < posts.size(); j++) {
 
-                /*
-                TODO connect to Reddit and retrieve the comments for each post
+
+                // TODO connect to Reddit and retrieve the comments for each post
                 // Attempt to grab the comments from Reddit for each post
-                // Store the retrieved data the comments table in the database
-                RedditComments theComments = null;
+                // Store the retrieved data in the comments table in the database
+                /* String commentString = "http://www.reddit.com/r/" + posts.get(j).getSubreddit() + "/comments/" + posts.get(j).getId() + ".json";
+                try {
+                    JSONArray commentsJSON = getJsonArray(commentString).getJSONObject(1).getJSONObject("data").getJSONArray("children");
+                    Log.i(TAG, "Number of comments retrieved: " + commentsJSON.length());
+                    Log.i(TAG, commentsJSON.getJSONObject(0).getJSONObject("data").getString("body"));
+                } catch (IOException e) {
+                    Log.e(TAG, "IOException getting comments: " + e);
+                } catch (JSONException e) {
+                    Log.e(TAG, "JSONException getting comments: " + e);
+                }
+                */
+
+                RedditComments theComments;
 
                 // Infinite loop to make sure the comments are returning the proper amount
-                do {
-                    try {
-                        theComments = redditInstance.commentsFor(posts.get(j).getSubreddit(), posts.get(j).getId(), 3);
-                        listofComments.add(theComments);
-                    } catch (RedditException e) {
-                        Log.e(TAG, "An error occurred trying to get the comments" + e);
-                    }
-                } while (theComments.getComments().size() < 3);
-                */
+                try {
+                    theComments = redditInstance.commentsFor(posts.get(j).getSubreddit(), posts.get(j).getId(), 5, 1);
+                    listofComments.add(theComments);
+                } catch (RedditException e) {
+                    Log.e(TAG, "An error occurred trying to get the comments" + e);
+                }
+
+
 
                 byte[] thumbnailBytes = getByteArray(posts.get(j).getThumbnail());
                 byte[] imageBytes = null;
@@ -244,6 +257,22 @@ public class ConnectToReddit extends AsyncTask<Object, Void, ArrayList<List<Redd
         return new JSONObject(responseStringBuilder.toString());
     }
 
+    private JSONArray getJsonArray(String jsonString) throws IOException, JSONException {
+        URL address = new URL(jsonString);
+        URLConnection connection = address.openConnection();
+
+        InputStream inputStream = connection.getInputStream();
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+        BufferedReader streamReader = new BufferedReader(new InputStreamReader(bufferedInputStream, "UTF-8"));
+        StringBuilder responseStringBuilder = new StringBuilder();
+        String inputString;
+        while ((inputString = streamReader.readLine()) != null) {
+            responseStringBuilder.append(inputString);
+        }
+
+        return new JSONArray(responseStringBuilder.toString());
+    }
+
     @Override
     protected void onPreExecute() {
         dialog = ProgressDialog.show(screenContext, "", "Please wait while the data downloads", true);
@@ -335,12 +364,13 @@ public class ConnectToReddit extends AsyncTask<Object, Void, ArrayList<List<Redd
         // Iterate through all of the subreddits selected
         for (int i = 0; i < numofsubreddits; i++) {
 
+            long[] subredditIndexes = new long[numofsubreddits];
             // Add the current subreddit to the sqlite subreddit table
             if (checkedSubreddits != null) {
-                database.addSubreddit(checkedSubreddits.get(i));
+                subredditIndexes[i] = database.addSubreddit(checkedSubreddits.get(i));
             }
             else {
-                database.addSubreddit(subreddit);
+               subredditIndexes[i] = database.addSubreddit(subreddit);
             }
 
             // Grab the list of posts from the current subreddit
@@ -359,44 +389,68 @@ public class ConnectToReddit extends AsyncTask<Object, Void, ArrayList<List<Redd
                 if (thumbnailByteArrays[j] instanceof byte[] && imageByteArrays[j] instanceof  byte[]) {
                     byte[] thumbnailImage = (byte[]) thumbnailByteArrays[j];
                     byte[] imageByteArray = (byte[]) imageByteArrays[j];
-                    database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), thumbnailImage, imageByteArray, i);
+                    long rowIndex = database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), thumbnailImage, imageByteArray, (int) subredditIndexes[i]);
+                    int rowIndexInt = (int) rowIndex;
+
+                    // TODO add comments from comment array into the database
+                    // Retrieve the comments for each post that have been stored in the comments array
+                    int currentPostPosition = ((j) + (26*i));
+                    for (RedditComment comment : listofComments.get(currentPostPosition).getComments()) {
+                        database.addComment(comment.getAuthor(), comment.getBody(), subredditInfo.get(j).getTitle(), comment.getUps(), comment.getDowns(), rowIndexInt);
+                    }
                 }
                 else if (thumbnailByteArrays[j] instanceof byte[] && !(imageByteArrays[j] instanceof  byte[])) {
                     byte[] thumbnailImage = (byte[]) thumbnailByteArrays[j];
-                    database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), thumbnailImage, null, i);
+                    long rowIndex = database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), thumbnailImage, null, (int) subredditIndexes[i]);
+                    int rowIndexInt = (int) rowIndex;
+
+                    // TODO add comments from comment array into the database
+                    // Retrieve the comments for each post that have been stored in the comments array
+                    int currentPostPosition = ((j) + (26*i));
+                    for (RedditComment comment : listofComments.get(currentPostPosition).getComments()) {
+                        database.addComment(comment.getAuthor(), comment.getBody(), subredditInfo.get(j).getTitle(), comment.getUps(), comment.getDowns(), rowIndexInt);
+                    }
                 }
                 else if (!(thumbnailByteArrays[j] instanceof byte[]) && imageByteArrays[j] instanceof  byte[]) {
                     byte[] imageByteArray = (byte[]) imageByteArrays[j];
-                    database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), null, imageByteArray, i);
+                    long rowIndex = database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), null, imageByteArray, (int) subredditIndexes[i]);
+                    int rowIndexInt = (int) rowIndex;
+
+                    // TODO add comments from comment array into the database
+                    // Retrieve the comments for each post that have been stored in the comments array
+                    int currentPostPosition = ((j) + (26*i));
+                    for (RedditComment comment : listofComments.get(currentPostPosition).getComments()) {
+                        database.addComment(comment.getAuthor(), comment.getBody(), subredditInfo.get(j).getTitle(), comment.getUps(), comment.getDowns(), rowIndexInt);
+                    }
                 }
                 else {
-                    database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), null, null, i);
+                    long rowIndex = database.addPost(subredditInfo.get(j).getTitle(), subredditInfo.get(j).getAuthor(), subredditInfo.get(j).getSubreddit(), subredditInfo.get(j).getNum_comments(), null, null, (int) subredditIndexes[i]);
+                    int rowIndexInt = (int) rowIndex;
+
+                    // TODO add comments from comment array into the database
+                    // Retrieve the comments for each post that have been stored in the comments array
+                    int currentPostPosition = ((j) + (26*i));
+                    for (RedditComment comment : listofComments.get(currentPostPosition).getComments()) {
+                        database.addComment(comment.getAuthor(), comment.getBody(), subredditInfo.get(j).getTitle(), comment.getUps(), comment.getDowns(), rowIndexInt);
+                    }
                 }
 
-                /*
-                TODO add comments from comment array into the database
-                // Retrieve the comments for each post that have been stored in the comments array
-                int currentPostPosition = ((j) + (26*i));
-                for (RedditComment comment : listofComments.get(currentPostPosition).getComments()) {
-                    database.addComment(comment.getAuthor(), comment.getBody(), subredditInfo.get(j).getTitle(), comment.getUps(), comment.getDowns(), currentPostPosition);
-                }
-                */
             }
 
             // Chunk of code to print values from the database to make sure information is
             // Storing properly.
             Subreddit = database.getSubreddits();
-            Post = database.getPosts(i);
+            Post = database.getPosts((int) subredditIndexes[i]);
             Subreddit.moveToPosition(i);
             Post.moveToFirst();
             Log.i(TAG, "Added the subreddit: " + Subreddit.getString(1) + " to the sqlite database, at position " + Subreddit.getString(0));
 
-            /*
-            TODO check to see if comments are storing properly by cycling through and printing them
+
+            // TODO check to see if comments are storing properly by cycling through and printing them
             while (!Post.isAfterLast()) {
                 Log.i(TAG, Post.getString(1));
                 int postPosition = Post.getInt(0);
-                Comment = database.getComments(Post.getString(1));
+                Comment = database.getComments(Post.getInt(0));
                 Comment.moveToFirst();
                 while (!Comment.isAfterLast()) {
                     int commentPosition = Comment.getInt(0);
@@ -405,7 +459,7 @@ public class ConnectToReddit extends AsyncTask<Object, Void, ArrayList<List<Redd
                 }
                 Post.moveToNext();
             }
-            */
+
         }
 
         database.close();

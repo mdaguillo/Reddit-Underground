@@ -239,6 +239,28 @@ public class Reddit {
         return parser.parseComments(limit);
     }
 
+    public RedditComments commentsFor(final String subreddit, final String linkId, final int limit, final int depth) throws RedditException{
+        final List<String> pathSegments 		= new ArrayList<String>(2);
+        final Map<String, String> queryParams = new HashMap<String, String>(2);
+
+        pathSegments.add(RedditApiResourceConstants.R);
+        pathSegments.add(subreddit);
+        pathSegments.add(RedditApiResourceConstants.COMMENTS);
+        pathSegments.add(linkId + RedditApiResourceConstants.DOT_JSON);
+
+        queryParams.put(RedditApiParameterConstants.LIMIT, Integer.toString(limit));
+        queryParams.put(RedditApiParameterConstants.DEPTH, Integer.toString(depth));
+
+        final RedditRequestInput requestInput
+                = new RedditRequestInput(pathSegments, queryParams);
+
+        final RedditRequestResponse response = requestor.executeGet(requestInput);
+
+        final RedditJsonParser parser = new RedditJsonParser(response.getBody());
+
+        return parser.parseComments(limit);
+    }
+
     //TODO: Is this always a Link?
     public List<RedditLink> infoForId(final String id) throws RedditException{
         final List<String> pathSegments = new ArrayList<String>(2);

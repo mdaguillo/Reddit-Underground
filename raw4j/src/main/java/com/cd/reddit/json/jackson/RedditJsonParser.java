@@ -324,8 +324,10 @@ public class RedditJsonParser {
 												  .get(RedditJsonConstants.CHILDREN);
 
 		final JsonNode moreNode			= childrenNode.get(childrenNode.size() - 1);
-		final boolean moreExists		= moreNode.get(RedditJsonConstants.KIND).asText().equals("more");
-		
+        boolean moreExists = false;
+        if (moreNode != null) {
+            moreExists = moreNode.get(RedditJsonConstants.KIND).asText().equals("more");
+        }
 		//See the 'replies' attribute of RedditComment. It is a JsonNode
 		final List<RedditLink> theParentLink	   = (List<RedditLink>) parseSpecificType(parentLinkNode, RedditJsonConstants.TYPE_LINK);
 		//final List<RedditComment> topLevelComments = (List<RedditComment>) parseSpecificType(rootNode, RedditJsonConstants.TYPE_COMMENT);

@@ -33,7 +33,7 @@
         jar="E:\Android studioProjects\Reddit-Underground\raw4j\build\libs\raw4j.jar"
         jumboMode="false"
         revision="21.1.2"
-        sha1="9ae5e34490811bebde35c74924bc71e0a7a741b0">
+        sha1="b9098149621d90f2bf44ac35ca916eae725f8fad">
         <dex dex="E:\Android studioProjects\Reddit-Underground\app\build\intermediates\pre-dexed\debug\raw4j-5e8db23ff67096cfade5f41f95b66e1f549ef0ee.jar" />
     </item>
     <item

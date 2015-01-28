@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mikedaguillo.reddit_underground;
+package com.mikedaguillo.reddit_underground.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;

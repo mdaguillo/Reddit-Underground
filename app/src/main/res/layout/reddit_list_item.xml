@@ -70,25 +70,11 @@
             />
 
         <TextView
-            android:id="@+id/rightSeperator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_toRightOf="@+id/postSubReddit"
-            android:layout_below="@+id/postTitle"
-            android:text="|"
-            android:textSize="10sp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            />
-
-        <TextView
             android:id="@+id/postComments"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:layout_toRightOf="@+id/rightSeperator"
-            android:layout_below="@+id/postTitle"
+            android:layout_below="@+id/postAuthor"
             android:text="Comments"
             android:textSize="10sp"
             />
