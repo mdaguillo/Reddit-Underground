@@ -9,5 +9,6 @@
     <string name="display_button">Display</string>
     <string name="user_login_text">Login To Your Reddit Account</string>
     <string name="delete_all">Delete All</string>
+    <string name="noComments">No comments to be found here</string>
 
 </resources>

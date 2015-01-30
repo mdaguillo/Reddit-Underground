@@ -80,28 +80,23 @@ public class SubredditsDatabaseHelper  extends SQLiteOpenHelper {
     }
 
     public Cursor getSubreddits() {
-        Cursor cursor = getReadableDatabase().rawQuery("select * from " + SUBREDDIT_TABLE_NAME, null);
-        return cursor;
+        return getReadableDatabase().rawQuery("select * from " + SUBREDDIT_TABLE_NAME, null);
     }
 
     public Cursor getPosts(int subredditID) {
-        Cursor cursor = getReadableDatabase().rawQuery("select * from " + POSTS_TABLE_NAME + " where subredditID = " + subredditID, null);
-        return cursor;
+        return getReadableDatabase().rawQuery("select * from " + POSTS_TABLE_NAME + " where subredditID = " + subredditID, null);
     }
 
     public Cursor getPosts(String subredditName) {
-        Cursor cursor = getReadableDatabase().rawQuery("select * from " + POSTS_TABLE_NAME + " where subreddit = \"" + subredditName + "\"", null);
-        return cursor;
+        return getReadableDatabase().rawQuery("select * from " + POSTS_TABLE_NAME + " where subreddit = \"" + subredditName + "\"", null);
+    }
+
+    public Cursor getPost(int postPosition) {
+        return getReadableDatabase().rawQuery("select * from " + POSTS_TABLE_NAME + " where _id = " + postPosition, null);
     }
 
     public Cursor getComments(int postID) {
-        Cursor cursor = getReadableDatabase().rawQuery("select * from " + COMMENTS_TABLE_NAME + " where postID = " + postID, null);
-        return cursor;
-    }
-
-    public Cursor getComments(String postTitle) {
-        Cursor cursor = getReadableDatabase().rawQuery("select * from " + COMMENTS_TABLE_NAME + " where postTitle = \"" + postTitle + "\"", null);
-        return cursor;
+        return getReadableDatabase().rawQuery("select * from " + COMMENTS_TABLE_NAME + " where postID = " + postID, null);
     }
 
     public void deleteAll() {

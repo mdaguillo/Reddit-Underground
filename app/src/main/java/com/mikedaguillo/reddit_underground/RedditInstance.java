@@ -71,8 +71,9 @@ public class RedditInstance extends ActionBarActivity {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
             cursor.moveToPosition(position);
-            Intent intent = new Intent(view.getContext(), ImageViewScreen.class);
-            intent.putExtra("Image_Byte_Array", cursor.getBlob(6));
+
+            Intent intent = new Intent(view.getContext(), CommentsListActivity.class);
+            intent.putExtra("Stored Post", cursor.getInt(0));
             startActivity(intent);
         }
     }
@@ -149,6 +150,18 @@ public class RedditInstance extends ActionBarActivity {
 
             return view;
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        databaseHelper.close();
+    }
+
+    @Override
+    protected  void onResume() {
+        super.onResume();
+        databaseHelper = new SubredditsDatabaseHelper(this);
     }
 }
 

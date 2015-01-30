@@ -96,6 +96,12 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
         database.close();
     }
 
+    @Override
+    protected  void onResume() {
+        super.onResume();
+        database = new SubredditsDatabaseHelper(this);
+    }
+
 
     private class CacheButtonListener implements View.OnClickListener {
 
@@ -113,6 +119,8 @@ public class SubredditsSelectionScreen extends ActionBarActivity {
             database.deleteAll();
         }
     }
+
+
 }
 
 
