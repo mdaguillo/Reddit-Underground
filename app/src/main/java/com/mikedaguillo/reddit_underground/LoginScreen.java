@@ -128,8 +128,13 @@ public class LoginScreen extends ActionBarActivity {
                 finish();
 
             } catch (RedditException e) {
-                Toast toast = Toast.makeText(LoginScreen.this, "Login Failed: Please Try Again", Toast.LENGTH_LONG);
-                toast.show();
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        // runs on UI thread
+                        Toast toast = Toast.makeText(LoginScreen.this, "Login Failed: Please Try Again", Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+                });
                 e.printStackTrace();
             }
 

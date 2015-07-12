@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="raw4j.raw4j">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/raw4j/build/libs/raw4j.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
